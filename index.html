@@ -114,20 +114,27 @@
       width: 100%;
       max-width: 680px;
     }
+
+    /* ============================================================
+       Cell — CSS now keeps words whole (keep-all) and only breaks
+       them mid-word as a last resort. JS auto-shrinks the font.
+       ============================================================ */
     .cell {
       aspect-ratio: 1; position: relative;
       display: flex; align-items: center; justify-content: center;
       text-align: center;
       padding: 6px;
       font-family: 'Cinzel', serif;
-      font-size: max(var(--fs-cell), 16px);
+      font-size: max(var(--fs-cell), 16px);   /* default; JS overrides per cell */
       font-weight: 600;
-      line-height: 1.2;
+      line-height: 1.15;
       background: var(--text); border: 2px solid var(--accent);
       border-radius: 6px; color: var(--secondary);
       cursor: text; overflow: hidden;
-      word-break: break-word; overflow-wrap: anywhere;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      /* Keep short words whole; only break a word if it can't fit alone */
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, font-size 0.1s;
       min-width: 0; outline: none; -webkit-tap-highlight-color: transparent;
     }
     .cell.empty::before {
@@ -308,7 +315,7 @@
 
         <label>Your 5×5 Grid</label>
         <div id="grid" class="grid-5x5"></div>
-        <p class="hint-line">Tap any square to type. Short entries up to 12 chars stay on one line and shrink to fit; longer text wraps. <strong>Centre square</strong> is the free space.</p>
+        <p class="hint-line">Tap any square to type. Words up to 12 characters stay whole and shrink to fit; longer words wrap. <strong>Centre square</strong> is the free space.</p>
 
         <div class="button-row">
           <button id="play">Play</button>
@@ -335,7 +342,7 @@
       <p class="modal-sub">A quick guide to every button and feature.</p>
       <ul class="feature-list">
         <li><span class="badge">Title</span><div class="text"><strong>Card Title</strong>The heading shown at the top of your card. Defaults to <em>BINGO</em> — change it to anything you like.</div></li>
-        <li><span class="badge">Grid</span><div class="text"><strong>5 × 5 Grid</strong>Click or tap any square to type. Entries up to 12 characters stay on a single line and shrink to fit — longer entries wrap onto multiple lines.</div></li>
+        <li><span class="badge">Grid</span><div class="text"><strong>5 × 5 Grid</strong>Click or tap any square to type. Words up to 12 characters stay whole and shrink to fit — longer words wrap character-by-character.</div></li>
         <li><span class="badge alt">Centre</span><div class="text"><strong>Centre Square (Free Space)</strong>The middle square is highlighted in gold. It stays fixed when you shuffle, and is auto-marked when you press Play.</div></li>
         <li><span class="badge">Play</span><div class="text"><strong>Play Button</strong>Locks the grid so it can't be edited. Click any square to <em>stamp</em> it — handy for tracking what's been called. Press again to stop playing and unlock.</div></li>
         <li><span class="badge alt">Shuffle</span><div class="text"><strong>Shuffle</strong>Randomly rearranges every filled square (the centre stays put). Great for generating a fresh card without retyping.</div></li>
@@ -351,6 +358,7 @@
   <canvas id="confetti-canvas"></canvas>
 
   <script>
+    /* ---------- HOW TO USE modal ---------- */
     (function () {
       const modal = document.getElementById("help-modal");
       const openBtn = document.getElementById("help-btn");
@@ -363,6 +371,7 @@
       document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
     })();
 
+    /* ---------- RELIABLE TEXT MEASUREMENT ---------- */
     const _measureCanvas = document.createElement("canvas");
     const _measureCtx = _measureCanvas.getContext("2d");
     window.__measureText = function (font, text) {
@@ -372,6 +381,118 @@
       return w;
     };
 
+    /* ============================================================
+       ON-SCREEN CELL AUTO-FIT
+       Mirrors the Python wrap rule so the input cells wrap the same
+       way as the saved PNG:
+         - Words ≤ 12 chars are kept whole (never split).
+         - Only longer words are broken character-by-character.
+         - Font shrinks until the widest line and total height fit.
+       ============================================================ */
+    const WORD_BREAK_LIMIT = 12;
+    const CELL_FONT_FAMILY = "Cinzel, Georgia, serif";
+
+    function wrapTextJS(text, maxW, fs) {
+      const font = `bold ${fs}px ${CELL_FONT_FAMILY}`;
+      const words = text.split(/\s+/).filter(Boolean);
+      if (!words.length) return [];
+      const lines = [];
+      let current = "";
+
+      for (const word of words) {
+        const candidate = current ? current + " " + word : word;
+        if (window.__measureText(font, candidate) <= maxW) {
+          current = candidate;
+          continue;
+        }
+        if (current) {
+          lines.push(current);
+          current = "";
+        }
+        // Short word: keep whole
+        if (word.length <= WORD_BREAK_LIMIT) {
+          current = word;
+          continue;
+        }
+        // Long word: try whole first
+        if (window.__measureText(font, word) <= maxW) {
+          current = word;
+          continue;
+        }
+        // Long word doesn't fit: break character-by-character
+        let rem = word;
+        while (rem) {
+          let lo = 1, hi = rem.length, best = 0;
+          while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (window.__measureText(font, rem.slice(0, mid)) <= maxW) {
+              best = mid; lo = mid + 1;
+            } else {
+              hi = mid - 1;
+            }
+          }
+          if (best === 0) best = 1;
+          if (best >= rem.length) {
+            current = rem;
+            rem = "";
+          } else {
+            lines.push(rem.slice(0, best));
+            rem = rem.slice(best);
+          }
+        }
+      }
+      if (current) lines.push(current);
+      return lines;
+    }
+
+    window.__fitCellText = function (cell) {
+      // Reset to CSS default so we can measure the natural size
+      cell.style.fontSize = "";
+
+      const text = (cell.textContent || "").replace(/\s+/g, " ").trim();
+      if (!text) return;
+
+      const cs = getComputedStyle(cell);
+      const startSize = Math.floor(parseFloat(cs.fontSize)) || 16;
+
+      // Content box dimensions
+      const padL = parseFloat(cs.paddingLeft) || 0;
+      const padR = parseFloat(cs.paddingRight) || 0;
+      const padT = parseFloat(cs.paddingTop) || 0;
+      const padB = parseFloat(cs.paddingBottom) || 0;
+      const innerW = cell.clientWidth - padL - padR;
+      const innerH = cell.clientHeight - padT - padB;
+      if (innerW <= 0 || innerH <= 0) return;
+
+      // Small safety margin so glyph overhang doesn't clip
+      const maxW = innerW - 2;
+      const maxH = innerH - 2;
+
+      for (let fs = startSize; fs >= 8; fs--) {
+        const lines = wrapTextJS(text, maxW, fs);
+        if (!lines.length) continue;
+        const lineH = fs * 1.15;
+        const totalH = lines.length * lineH;
+        let widest = 0;
+        for (const l of lines) {
+          const w = window.__measureText(`bold ${fs}px ${CELL_FONT_FAMILY}`, l);
+          if (w > widest) widest = w;
+        }
+        if (widest <= maxW && totalH <= maxH) {
+          cell.style.fontSize = fs + "px";
+          return;
+        }
+      }
+      cell.style.fontSize = "8px";
+    };
+
+    window.__fitAllCells = function () {
+      const grid = document.getElementById("grid");
+      if (!grid) return;
+      grid.querySelectorAll(".cell").forEach(window.__fitCellText);
+    };
+
+    /* ---------- CRC32 for PNG chunks ---------- */
     const crcTable = (() => {
       const t = new Uint32Array(256);
       for (let n = 0; n < 256; n++) {
@@ -450,6 +571,7 @@
       readMetadataFromPng(file).then((j) => callback(j || "")).catch(() => callback(""));
     };
 
+    /* ---------- Confetti ---------- */
     window.startConfetti = function () {
       const canvas = document.getElementById("confetti-canvas");
       const ctx = canvas.getContext("2d");
@@ -481,6 +603,13 @@
       }
       animate();
     };
+
+    /* ---------- Re-fit all cells on resize ---------- */
+    let __resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(__resizeTimer);
+      __resizeTimer = setTimeout(window.__fitAllCells, 80);
+    });
   </script>
 
   <script type="py">
@@ -494,7 +623,7 @@
     bingo_state = False
     marked = [False] * 25
     MAX_CHARS = 60
-    SINGLE_LINE_LIMIT = 12   # ≤ this many chars stays on one line (shrinks to fit)
+    WORD_BREAK_LIMIT = 12
 
     FONT_FAMILY = "Cinzel, Georgia, serif"
 
@@ -548,10 +677,12 @@
             if current:
                 lines.append(current)
                 current = ""
+            if len(word) <= WORD_BREAK_LIMIT:
+                current = word
+                continue
             if measure_text(word, font_size) <= max_width:
                 current = word
                 continue
-            # Word itself too wide — break character-by-character
             remaining = word
             while remaining:
                 lo, hi, best = 1, len(remaining), 0
@@ -575,21 +706,8 @@
         return lines
 
     def fit_text_for_cell(text, max_w, max_h):
-        """
-        Choose a font size and line layout for a cell.
-
-        Rule:
-          - If the text is <= SINGLE_LINE_LIMIT characters, force a single
-            line and shrink the font until it fits the cell width.
-          - Otherwise, wrap normally and shrink until the wrapped block fits.
-        """
-        force_single_line = len(text) <= SINGLE_LINE_LIMIT
-
         for fs in range(60, 9, -1):
-            if force_single_line:
-                lines = [text]
-            else:
-                lines = wrap_text(text, max_w, fs)
+            lines = wrap_text(text, max_w, fs)
             if not lines:
                 continue
             line_h = fs * 1.15
@@ -597,9 +715,6 @@
             widest = max((measure_text(l, fs) for l in lines), default=0)
             if widest <= max_w and total_h <= max_h:
                 return fs, lines
-
-        if force_single_line:
-            return 10, [text]
         return 10, wrap_text(text, max_w, 10)
 
     def cell_text(cell):
@@ -614,6 +729,8 @@
     def set_cell(cell, value):
         cell.textContent = value
         refresh_empty_class(cell)
+        # Re-fit the on-screen font for this cell
+        window.__fitCellText(cell)
 
     def draw_card(*args):
         w = canvas.width
@@ -701,6 +818,7 @@
             sel = window.getSelection()
             sel.removeAllRanges(); sel.addRange(rng)
         refresh_empty_class(cell)
+        window.__fitCellText(cell)   # shrink on-screen font like the PNG
         draw_card()
 
     def handle_click(event):
@@ -812,7 +930,7 @@
         imported_cells = data.get("cells", [])
         for i, c in enumerate(cells):
             val = imported_cells[i] if i < len(imported_cells) else ""
-            set_cell(c, val if val is not None else "")
+            set_cell(c, val if val is not None else "")   # also re-fits font
         if play_mode: toggle_play()
         draw_card()
         status.textContent = "✓ Card imported!"
@@ -836,8 +954,10 @@
   </script>
 
   <script>
+    // After fonts load, do an initial fit of every cell
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(function () {
+        if (window.__fitAllCells) window.__fitAllCells();
         if (window.__bingoRedraw) window.__bingoRedraw();
       });
     }
