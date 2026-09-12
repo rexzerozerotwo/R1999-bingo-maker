@@ -16,12 +16,12 @@
     :root {
       --dominant: #1A2E3B; --secondary: #25211E; --accent: #D9A752; --text: #EAE3CD;
       --accent-dark: #8a6a2b; --dominant-light: #24414f; --dominant-dark: #0f1c25;
-      --fs-title: clamp(1.4rem, 5.5vw, 2.5rem);
+      --fs-title: clamp(1.8rem, 6vw, 3rem);
       --fs-heading: clamp(1.6rem, 6.5vw, 2.5rem);
       --fs-sub: clamp(0.85rem, 3vw, 1rem);
       --fs-label: clamp(0.8rem, 2.8vw, 0.95rem);
-      --fs-cell: clamp(0.7rem, 2.4vw, 1.05rem);
-      --fs-placeholder: clamp(0.6rem, 2vw, 0.85rem);
+      --fs-cell: clamp(0.95rem, 3.2vw, 1.5rem);
+      --fs-placeholder: clamp(0.7rem, 2.4vw, 1rem);
       --fs-button: clamp(0.75rem, 2.6vw, 1rem);
       --fs-status: clamp(1rem, 4.2vw, 1.4rem);
     }
@@ -51,81 +51,79 @@
 
     .app {
       position: relative; z-index: 1;
-      max-width: 1200px; width: 100%;
+      max-width: 1500px; width: 100%;
       background: var(--secondary);
       border: 4px solid var(--accent); border-radius: 12px;
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(217, 167, 82, 0.25);
       padding: clamp(16px, 4vw, 30px);
     }
 
-    /* ---- Header with help button ---- */
-    header {
-      position: relative;
-      margin-bottom: 20px;
-    }
+    header { position: relative; margin-bottom: 20px; }
     header h1 {
       font-family: 'Cinzel Decorative', 'Cinzel', serif;
       font-size: var(--fs-heading); margin: 0 0 5px;
       color: var(--accent); text-shadow: 2px 2px 0 #0d1418;
       text-align: center; letter-spacing: 1px; line-height: 1.15;
     }
-    header p {
-      font-style: italic; font-size: var(--fs-sub);
-      color: #b9b09a; text-align: center; margin: 0; line-height: 1.4;
-    }
+    header p { font-style: italic; font-size: var(--fs-sub); color: #b9b09a; text-align: center; margin: 0; line-height: 1.4; }
 
     #help-btn {
-      position: absolute;
-      top: 0; right: 0;
-      width: 40px; height: 40px;
-      padding: 0;
-      border-radius: 50%;
+      position: absolute; top: 0; right: 0;
+      width: 40px; height: 40px; padding: 0; border-radius: 50%;
       font-family: 'Cinzel', serif;
-      font-size: 1.3rem;
-      font-weight: 700;
       background: linear-gradient(to bottom, var(--accent), var(--accent-dark));
       color: var(--secondary);
       box-shadow: 0 3px 0 #4a3818;
       border: 1px solid rgba(0, 0, 0, 0.3);
       cursor: pointer;
-      line-height: 1;
       display: flex; align-items: center; justify-content: center;
     }
     #help-btn:hover { background: linear-gradient(to bottom, #e6b862, #a07d33); }
     #help-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #4a3818; }
-    #help-btn::before {
-      content: "?";
-      font-size: 1.4rem;
-      line-height: 1;
-    }
+    #help-btn::before { content: "?"; font-size: 1.4rem; line-height: 1; }
 
     .workspace { display: flex; gap: clamp(16px, 3vw, 30px); flex-wrap: wrap; justify-content: center; align-items: flex-start; }
-    .editor { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+    .editor { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
     .editor > label { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); letter-spacing: 1px; font-size: var(--fs-label); }
+
     #card-title {
-      font-family: 'Cinzel', serif; font-size: var(--fs-title); font-weight: 700;
-      width: clamp(160px, 55%, 220px); padding: 6px 10px;
-      background: var(--text); border: 3px solid var(--accent);
-      border-radius: 6px; color: var(--secondary); text-align: center; align-self: flex-start;
+      font-family: 'Cinzel', serif;
+      font-size: var(--fs-title);
+      font-weight: 700;
+      width: clamp(240px, 75%, 380px);
+      padding: 12px 16px;
+      background: var(--text);
+      border: 3px solid var(--accent);
+      border-radius: 8px;
+      color: var(--secondary);
+      text-align: center;
+      align-self: flex-start;
+      letter-spacing: 1px;
     }
     #card-title:read-only { background: #cdc5ab; }
 
     .grid-5x5 {
-      display: grid; grid-template-columns: repeat(5, 1fr);
-      gap: clamp(3px, 0.8vw, 6px);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: clamp(6px, 1.2vw, 10px);
       background: var(--dominant-dark);
-      padding: clamp(5px, 1.2vw, 8px);
-      border: 3px solid var(--accent); border-radius: 8px;
-      width: 100%; max-width: 520px;
+      padding: clamp(8px, 1.6vw, 12px);
+      border: 3px solid var(--accent);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 680px;
     }
     .cell {
       aspect-ratio: 1; position: relative;
       display: flex; align-items: center; justify-content: center;
-      text-align: center; padding: 4px;
+      text-align: center;
+      padding: 6px;
       font-family: 'Cinzel', serif;
-      font-size: max(var(--fs-cell), 12px); font-weight: 600; line-height: 1.15;
+      font-size: max(var(--fs-cell), 16px);
+      font-weight: 600;
+      line-height: 1.2;
       background: var(--text); border: 2px solid var(--accent);
-      border-radius: 4px; color: var(--secondary);
+      border-radius: 6px; color: var(--secondary);
       cursor: text; overflow: hidden;
       word-break: break-word; overflow-wrap: anywhere;
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
@@ -151,13 +149,7 @@
     }
     .cell.marked.empty::before { color: rgba(217, 167, 82, 0.5); }
 
-    .hint-line {
-      font-style: italic;
-      font-size: var(--fs-label);
-      color: #b9b09a;
-      margin-top: -4px;
-      line-height: 1.4;
-    }
+    .hint-line { font-style: italic; font-size: var(--fs-label); color: #b9b09a; margin-top: -4px; line-height: 1.4; }
     .hint-line strong { color: var(--accent); font-style: normal; font-weight: 600; }
 
     .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
@@ -194,174 +186,83 @@
       text-shadow: 0 0 12px rgba(217, 167, 82, 0.8), 2px 2px 0 #0d1418;
       letter-spacing: 2px; line-height: 1.3;
     }
-    .preview { flex: 1 1 320px; min-width: 0; display: flex; justify-content: center; align-items: flex-start; }
-    #preview { width: 100%; max-width: 500px; height: auto; border: 4px solid var(--accent); border-radius: 8px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.55); }
+    /* ---------- BIGGER PREVIEW ---------- */
+    .preview { flex: 1 1 500px; min-width: 0; display: flex; justify-content: center; align-items: flex-start; }
+    #preview {
+      width: 100%;
+      max-width: 760px;             /* was 560px */
+      height: auto;
+      border: 4px solid var(--accent);
+      border-radius: 10px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+    }
     #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
 
-    /* ============================================================
-       HOW TO USE MODAL
-       ============================================================ */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9998;
+      position: fixed; inset: 0; z-index: 9998;
       background: rgba(15, 28, 37, 0.85);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      overflow-y: auto;
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; overflow-y: auto;
     }
-    .modal-overlay.open {
-      display: flex;
-      animation: fadeIn 0.2s ease-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .modal {
-      background: var(--secondary);
-      border: 3px solid var(--accent);
-      border-radius: 12px;
+      background: var(--secondary); border: 3px solid var(--accent); border-radius: 12px;
       box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(217, 167, 82, 0.25);
-      max-width: 640px;
-      width: 100%;
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
-      padding: clamp(20px, 4vw, 32px);
-      position: relative;
+      max-width: 640px; width: 100%; max-height: calc(100vh - 40px); overflow-y: auto;
+      padding: clamp(20px, 4vw, 32px); position: relative;
       animation: slideUp 0.25s ease-out;
     }
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
-    }
-
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .modal h2 {
       font-family: 'Cinzel Decorative', 'Cinzel', serif;
-      font-size: clamp(1.3rem, 4vw, 1.8rem);
-      color: var(--accent);
-      text-align: center;
-      margin: 0 0 6px;
-      text-shadow: 2px 2px 0 #0d1418;
-      letter-spacing: 1px;
+      font-size: clamp(1.3rem, 4vw, 1.8rem); color: var(--accent);
+      text-align: center; margin: 0 0 6px;
+      text-shadow: 2px 2px 0 #0d1418; letter-spacing: 1px;
     }
-    .modal .modal-sub {
-      font-style: italic;
-      color: #b9b09a;
-      text-align: center;
-      font-size: var(--fs-sub);
-      margin: 0 0 24px;
-    }
+    .modal .modal-sub { font-style: italic; color: #b9b09a; text-align: center; font-size: var(--fs-sub); margin: 0 0 24px; }
     .modal-close {
-      position: absolute;
-      top: 12px; right: 12px;
-      width: 36px; height: 36px;
-      padding: 0;
-      border-radius: 50%;
-      font-family: 'Cinzel', serif;
-      font-size: 1.2rem;
-      background: rgba(217, 167, 82, 0.15);
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      cursor: pointer;
-      line-height: 1;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: none;
+      position: absolute; top: 12px; right: 12px;
+      width: 36px; height: 36px; padding: 0; border-radius: 50%;
+      font-family: 'Cinzel', serif; background: rgba(217, 167, 82, 0.15);
+      color: var(--accent); border: 1px solid var(--accent); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; box-shadow: none;
       transition: background 0.15s, transform 0.1s;
     }
     .modal-close:hover { background: rgba(217, 167, 82, 0.3); }
     .modal-close:active { transform: scale(0.92); box-shadow: none; }
     .modal-close::before { content: "✕"; font-size: 1rem; }
-
-    .feature-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+    .feature-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
     .feature-list li {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 14px;
-      align-items: flex-start;
-      padding: 12px 14px;
-      background: rgba(26, 46, 59, 0.5);
-      border-left: 3px solid var(--accent);
-      border-radius: 6px;
-      line-height: 1.5;
+      display: grid; grid-template-columns: auto 1fr; gap: 14px;
+      align-items: flex-start; padding: 12px 14px;
+      background: rgba(26, 46, 59, 0.5); border-left: 3px solid var(--accent);
+      border-radius: 6px; line-height: 1.5;
     }
     .feature-list .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      font-size: 0.85rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 32px; height: 32px; border-radius: 6px;
+      font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.85rem;
       background: linear-gradient(to bottom, var(--accent), var(--accent-dark));
-      color: var(--secondary);
-      box-shadow: 0 2px 0 #4a3818;
-      padding: 0 8px;
-      white-space: nowrap;
+      color: var(--secondary); box-shadow: 0 2px 0 #4a3818;
+      padding: 0 8px; white-space: nowrap;
     }
-    .feature-list .badge.alt {
-      background: linear-gradient(to bottom, var(--dominant-light), var(--dominant-dark));
-      color: var(--text);
-      box-shadow: 0 2px 0 #0a141a;
-      border: 1px solid var(--accent);
-    }
-    .feature-list .badge.crimson {
-      background: linear-gradient(to bottom, #6e2b2b, #3f1717);
-      color: var(--text);
-      box-shadow: 0 2px 0 #250d0d;
-      border: 1px solid var(--accent);
-    }
-    .feature-list .badge.cream {
-      background: linear-gradient(to bottom, var(--text), #c9bfa0);
-      color: var(--secondary);
-      box-shadow: 0 2px 0 #7d7458;
-    }
-    .feature-list .badge.grey {
-      background: linear-gradient(to bottom, #4a5a68, #2c3844);
-      color: var(--text);
-      box-shadow: 0 2px 0 #1a232a;
-      border: 1px solid var(--accent);
-    }
-    .feature-list .text {
-      font-size: var(--fs-sub);
-      color: var(--text);
-    }
+    .feature-list .badge.alt { background: linear-gradient(to bottom, var(--dominant-light), var(--dominant-dark)); color: var(--text); box-shadow: 0 2px 0 #0a141a; border: 1px solid var(--accent); }
+    .feature-list .badge.crimson { background: linear-gradient(to bottom, #6e2b2b, #3f1717); color: var(--text); box-shadow: 0 2px 0 #250d0d; border: 1px solid var(--accent); }
+    .feature-list .badge.cream { background: linear-gradient(to bottom, var(--text), #c9bfa0); color: var(--secondary); box-shadow: 0 2px 0 #7d7458; }
+    .feature-list .badge.grey { background: linear-gradient(to bottom, #4a5a68, #2c3844); color: var(--text); box-shadow: 0 2px 0 #1a232a; border: 1px solid var(--accent); }
+    .feature-list .text { font-size: var(--fs-sub); color: var(--text); }
     .feature-list .text strong {
-      color: var(--accent);
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
-      display: block;
-      margin-bottom: 2px;
-      font-size: clamp(0.85rem, 2.8vw, 1rem);
-      letter-spacing: 0.5px;
+      color: var(--accent); font-family: 'Cinzel', serif; font-weight: 600;
+      display: block; margin-bottom: 2px;
+      font-size: clamp(0.85rem, 2.8vw, 1rem); letter-spacing: 0.5px;
     }
-    .feature-list .text em {
-      color: #d8cfb4;
-      font-style: italic;
-    }
-
+    .feature-list .text em { color: #d8cfb4; font-style: italic; }
     .modal-foot {
-      margin-top: 20px;
-      text-align: center;
-      font-style: italic;
-      color: #b9b09a;
-      font-size: var(--fs-sub);
-      border-top: 1px solid rgba(217, 167, 82, 0.25);
-      padding-top: 14px;
+      margin-top: 20px; text-align: center; font-style: italic;
+      color: #b9b09a; font-size: var(--fs-sub);
+      border-top: 1px solid rgba(217, 167, 82, 0.25); padding-top: 14px;
     }
 
     @media (max-width: 600px) {
@@ -369,9 +270,9 @@
       .app { padding: 14px; border-width: 3px; border-radius: 10px; }
       .workspace { gap: 14px; }
       .editor, .preview { flex: 1 1 100%; }
-      .grid-5x5 { gap: 3px; padding: 5px; }
-      .cell { border-width: 1px; border-radius: 3px; padding: 3px; }
-      #card-title { width: 100%; align-self: stretch; }
+      .grid-5x5 { gap: 4px; padding: 6px; max-width: 100%; }
+      .cell { border-width: 1px; border-radius: 4px; padding: 4px; }
+      #card-title { width: 100%; align-self: stretch; padding: 10px 12px; }
       .button-row { gap: 6px; }
       button { flex: 1 1 calc(50% - 6px); letter-spacing: 0.5px; }
       #help-btn { width: 34px; height: 34px; font-size: 1.1rem; }
@@ -422,121 +323,47 @@
       </div>
 
       <div class="preview">
-        <canvas id="preview" width="600" height="700"></canvas>
+        <!-- BIGGER canvas: 900 × 1050 (was 600 × 700) -->
+        <canvas id="preview" width="900" height="1050"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================
-       HOW TO USE MODAL
-       ============================================================ -->
   <div class="modal-overlay" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
     <div class="modal">
       <button class="modal-close" id="help-close" aria-label="Close instructions"></button>
-
       <h2 id="help-title">How to Use</h2>
       <p class="modal-sub">A quick guide to every button and feature.</p>
-
       <ul class="feature-list">
-        <li>
-          <span class="badge">Title</span>
-          <div class="text">
-            <strong>Card Title</strong>
-            The heading shown at the top of your card. Defaults to <em>BINGO</em> — change it to anything you like.
-          </div>
-        </li>
-
-        <li>
-          <span class="badge">Grid</span>
-          <div class="text">
-            <strong>5 × 5 Grid</strong>
-            Click or tap any square to type. Long text wraps onto multiple lines and shrinks to fit — no need to shorten it. Up to 60 characters per square.
-          </div>
-        </li>
-
-        <li>
-          <span class="badge alt">Centre</span>
-          <div class="text">
-            <strong>Centre Square (Free Space)</strong>
-            The middle square is highlighted in gold. It stays fixed when you shuffle, and is auto-marked when you press Play.
-          </div>
-        </li>
-
-        <li>
-          <span class="badge">Play</span>
-          <div class="text">
-            <strong>Play Button</strong>
-            Locks the grid so it can't be edited. Click any square to <em>stamp</em> it — handy for tracking what's been called. Press again to stop playing and unlock.
-          </div>
-        </li>
-
-        <li>
-          <span class="badge alt">Shuffle</span>
-          <div class="text">
-            <strong>Shuffle</strong>
-            Randomly rearranges every filled square (the centre stays put). Great for generating a fresh card without retyping.
-          </div>
-        </li>
-
-        <li>
-          <span class="badge crimson">Clear</span>
-          <div class="text">
-            <strong>Clear Board</strong>
-            Empties every square so you can start over from scratch.
-          </div>
-        </li>
-
-        <li>
-          <span class="badge cream">PNG</span>
-          <div class="text">
-            <strong>Save as PNG</strong>
-            Downloads your card as an image. The card's text is stored <em>inside</em> the file, so you can import it later with everything intact.
-          </div>
-        </li>
-
-        <li>
-          <span class="badge grey">Import</span>
-          <div class="text">
-            <strong>Import Card</strong>
-            Load a PNG you saved earlier and the title plus every square is restored automatically. (Only works with cards saved from this site.)
-          </div>
-        </li>
-
-        <li>
-          <span class="badge">🎉</span>
-          <div class="text">
-            <strong>BINGO!</strong>
-            While in Play mode, mark a full row, column, or diagonal and confetti will rain down. A golden banner appears at the top.
-          </div>
-        </li>
+        <li><span class="badge">Title</span><div class="text"><strong>Card Title</strong>The heading shown at the top of your card. Defaults to <em>BINGO</em> — change it to anything you like.</div></li>
+        <li><span class="badge">Grid</span><div class="text"><strong>5 × 5 Grid</strong>Click or tap any square to type. Long text wraps onto multiple lines and shrinks to fit — no need to shorten it. Up to 60 characters per square.</div></li>
+        <li><span class="badge alt">Centre</span><div class="text"><strong>Centre Square (Free Space)</strong>The middle square is highlighted in gold. It stays fixed when you shuffle, and is auto-marked when you press Play.</div></li>
+        <li><span class="badge">Play</span><div class="text"><strong>Play Button</strong>Locks the grid so it can't be edited. Click any square to <em>stamp</em> it — handy for tracking what's been called. Press again to stop playing and unlock.</div></li>
+        <li><span class="badge alt">Shuffle</span><div class="text"><strong>Shuffle</strong>Randomly rearranges every filled square (the centre stays put). Great for generating a fresh card without retyping.</div></li>
+        <li><span class="badge crimson">Clear</span><div class="text"><strong>Clear Board</strong>Empties every square so you can start over from scratch.</div></li>
+        <li><span class="badge cream">PNG</span><div class="text"><strong>Save as PNG</strong>Downloads your card as an image. The card's text is stored <em>inside</em> the file, so you can import it later with everything intact.</div></li>
+        <li><span class="badge grey">Import</span><div class="text"><strong>Import Card</strong>Load a PNG you saved earlier and the title plus every square is restored automatically. (Only works with cards saved from this site.)</div></li>
+        <li><span class="badge">🎉</span><div class="text"><strong>BINGO!</strong>While in Play mode, mark a full row, column, or diagonal and confetti will rain down. A golden banner appears at the top.</div></li>
       </ul>
-
       <p class="modal-foot">Tip: your card is saved entirely in your browser — nothing is uploaded anywhere.</p>
     </div>
   </div>
 
   <canvas id="confetti-canvas"></canvas>
 
-  <!-- ==================================================================
-       JS helpers: modal, reliable text measurement, PNG metadata, confetti
-       ================================================================== -->
   <script>
-    /* ---------- HOW TO USE modal ---------- */
     (function () {
       const modal = document.getElementById("help-modal");
       const openBtn = document.getElementById("help-btn");
       const closeBtn = document.getElementById("help-close");
-
       function open() { modal.classList.add("open"); document.body.style.overflow = "hidden"; }
       function close() { modal.classList.remove("open"); document.body.style.overflow = ""; }
-
       openBtn.addEventListener("click", open);
       closeBtn.addEventListener("click", close);
       modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
       document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
     })();
 
-    /* ---------- RELIABLE TEXT MEASUREMENT ---------- */
     const _measureCanvas = document.createElement("canvas");
     const _measureCtx = _measureCanvas.getContext("2d");
     window.__measureText = function (font, text) {
@@ -546,7 +373,6 @@
       return w;
     };
 
-    /* ---------- CRC32 for PNG chunks ---------- */
     const crcTable = (() => {
       const t = new Uint32Array(256);
       for (let n = 0; n < 256; n++) {
@@ -563,8 +389,7 @@
     }
     function textToBytes(str) { return new TextEncoder().encode(str); }
     function makeTextChunk(keyword, text) {
-      const kw = textToBytes(keyword);
-      const tx = textToBytes(text);
+      const kw = textToBytes(keyword); const tx = textToBytes(text);
       const data = new Uint8Array(kw.length + 1 + tx.length);
       data.set(kw, 0); data[kw.length] = 0; data.set(tx, kw.length + 1);
       const typeBytes = textToBytes("tEXt");
@@ -573,9 +398,7 @@
       const crc = crc32(crcInput);
       const chunk = new Uint8Array(4 + 4 + data.length + 4);
       const view = new DataView(chunk.buffer);
-      view.setUint32(0, data.length);
-      chunk.set(typeBytes, 4);
-      chunk.set(data, 8);
+      view.setUint32(0, data.length); chunk.set(typeBytes, 4); chunk.set(data, 8);
       view.setUint32(8 + data.length, crc);
       return chunk;
     }
@@ -593,8 +416,7 @@
       const buf = new Uint8Array(await file.arrayBuffer());
       const sig = [137, 80, 78, 71, 13, 10, 26, 10];
       for (let i = 0; i < 8; i++) if (buf[i] !== sig[i]) return null;
-      let offset = 8;
-      const decoder = new TextDecoder();
+      let offset = 8; const decoder = new TextDecoder();
       while (offset + 8 <= buf.length) {
         const view = new DataView(buf.buffer, buf.byteOffset + offset);
         const len = view.getUint32(0);
@@ -629,7 +451,6 @@
       readMetadataFromPng(file).then((j) => callback(j || "")).catch(() => callback(""));
     };
 
-    /* ---------- Confetti ---------- */
     window.startConfetti = function () {
       const canvas = document.getElementById("confetti-canvas");
       const ctx = canvas.getContext("2d");
@@ -663,7 +484,6 @@
     };
   </script>
 
-  <!-- ================= Python (PyScript) ================= -->
   <script type="py">
     import json
     import random
@@ -710,9 +530,6 @@
     import_input = document.getElementById("import-file")
     title_input = document.getElementById("card-title")
 
-    # ============================================================
-    # TEXT MEASUREMENT & WRAPPING
-    # ============================================================
     def measure_text(text, font_size):
         font = f"bold {int(font_size)}px {FONT_FAMILY}"
         return float(window.__measureText(font, text))
@@ -770,30 +587,36 @@
         refresh_empty_class(cell)
 
     # ============================================================
-    # DRAW CANVAS
+    # DRAW CANVAS — 900 × 1050, everything scaled up 1.5× from original
     # ============================================================
     def draw_card(*args):
         w = canvas.width
         h = canvas.height
         ctx.clearRect(0, 0, w, h)
 
+        # Parchment background
         ctx.fillStyle = "#EAE3CD"
         ctx.fillRect(0, 0, w, h)
-        ctx.strokeStyle = "#D9A752"; ctx.lineWidth = 8
-        ctx.strokeRect(4, 4, w - 8, h - 8)
-        ctx.strokeStyle = "#8a6a2b"; ctx.lineWidth = 2
-        ctx.strokeRect(12, 12, w - 24, h - 24)
 
+        # Outer + inner borders (thicker)
+        ctx.strokeStyle = "#D9A752"; ctx.lineWidth = 12
+        ctx.strokeRect(6, 6, w - 12, h - 12)
+        ctx.strokeStyle = "#8a6a2b"; ctx.lineWidth = 3
+        ctx.strokeRect(18, 18, w - 36, h - 36)
+
+        # Title — larger font
         title = title_input.value or "BINGO"
-        ctx.font = f"bold 48px 'Cinzel Decorative', {FONT_FAMILY}"
+        ctx.font = f"bold 72px 'Cinzel Decorative', {FONT_FAMILY}"
         ctx.fillStyle = "#25211E"
         ctx.textAlign = "center"; ctx.textBaseline = "middle"
-        ctx.fillText(title, w / 2, 80)
+        ctx.fillText(title, w / 2, 120)
 
-        grid_top = 130
-        grid_size = w - 60
-        cell_size = grid_size / 5
-        start_x = 30; start_y = grid_top
+        # Grid geometry
+        grid_top = 195
+        grid_size = w - 90          # 810
+        cell_size = grid_size / 5   # 162 (was 108)
+        start_x = 45
+        start_y = grid_top
 
         for row in range(5):
             for col in range(5):
@@ -805,21 +628,22 @@
                 if is_marked: ctx.fillStyle = "#0f1c25"
                 elif idx == MIDDLE_INDEX: ctx.fillStyle = "#f0e8cf"
                 else: ctx.fillStyle = "#faf4e0"
-                ctx.fillRect(x + 2, y + 2, cell_size - 4, cell_size - 4)
+                ctx.fillRect(x + 3, y + 3, cell_size - 6, cell_size - 6)
 
                 if is_marked or idx == MIDDLE_INDEX: ctx.strokeStyle = "#D9A752"
                 else: ctx.strokeStyle = "#8a6a2b"
-                ctx.lineWidth = 3
-                ctx.strokeRect(x + 2, y + 2, cell_size - 4, cell_size - 4)
+                ctx.lineWidth = 4
+                ctx.strokeRect(x + 3, y + 3, cell_size - 6, cell_size - 6)
 
                 text = cell_text(cells[idx])
-                max_w = cell_size - 18
-                max_h = cell_size - 18
+                max_w = cell_size - 26
+                max_h = cell_size - 26
 
                 if text:
-                    chosen_fs = 8
-                    chosen_lines = wrap_text(text, max_w, 8)
-                    for fs in range(26, 7, -1):
+                    chosen_fs = 10
+                    chosen_lines = wrap_text(text, max_w, 10)
+                    # Try font sizes from 44 down to 10
+                    for fs in range(44, 9, -1):
                         lines = wrap_text(text, max_w, fs)
                         if not lines:
                             continue
@@ -831,8 +655,9 @@
                             chosen_lines = lines
                             break
 
+                    # Safety: if the widest line still overflows, drop to 10
                     if measure_text(max(chosen_lines, key=lambda s: measure_text(s, chosen_fs)), chosen_fs) > max_w:
-                        chosen_fs = 8
+                        chosen_fs = 10
                         chosen_lines = wrap_text(text, max_w, chosen_fs)
 
                     ctx.font = f"bold {chosen_fs}px {FONT_FAMILY}"
@@ -845,14 +670,11 @@
                     for i, line in enumerate(chosen_lines):
                         ctx.fillText(line, x + cell_size / 2, first_y + i * line_h)
                 else:
-                    ctx.font = "italic 14px 'EB Garamond', Georgia, serif"
+                    ctx.font = "italic 22px 'EB Garamond', Georgia, serif"
                     ctx.fillStyle = "#8a8574" if not is_marked else "rgba(217,167,82,0.5)"
                     ctx.textAlign = "center"; ctx.textBaseline = "middle"
                     ctx.fillText("...", x + cell_size / 2, y + cell_size / 2)
 
-    # ============================================================
-    # BINGO / EVENTS
-    # ============================================================
     def check_bingo():
         global bingo_state
         is_bingo = any(all(marked[i] for i in line) for line in LINES)
