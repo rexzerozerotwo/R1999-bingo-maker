@@ -4,444 +4,204 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Merlin's Bingo — Knight's Card Maker</title>
-  <meta name="description" content="Create a 5x5 bingo card with your own text and save it as a PNG." />
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
 
-  <!-- PyScript -->
   <link rel="stylesheet" href="https://pyscript.net/releases/2024.11.1/core.css" />
   <script type="module" src="https://pyscript.net/releases/2024.11.1/core.js"></script>
 
   <style>
     :root {
-      --dominant: #1A2E3B;
-      --secondary: #25211E;
-      --accent: #D9A752;
-      --text: #EAE3CD;
-      --accent-dark: #8a6a2b;
-      --dominant-light: #24414f;
-      --dominant-dark: #0f1c25;
-
-      --fs-title:    clamp(1.4rem, 5.5vw, 2.5rem);
-      --fs-heading:  clamp(1.6rem, 6.5vw, 2.5rem);
-      --fs-sub:      clamp(0.85rem, 3vw, 1rem);
-      --fs-label:    clamp(0.8rem, 2.8vw, 0.95rem);
-      --fs-cell:     clamp(0.7rem, 2.4vw, 1.05rem);
+      --dominant: #1A2E3B; --secondary: #25211E; --accent: #D9A752; --text: #EAE3CD;
+      --accent-dark: #8a6a2b; --dominant-light: #24414f; --dominant-dark: #0f1c25;
+      --fs-title: clamp(1.4rem, 5.5vw, 2.5rem);
+      --fs-heading: clamp(1.6rem, 6.5vw, 2.5rem);
+      --fs-sub: clamp(0.85rem, 3vw, 1rem);
+      --fs-label: clamp(0.8rem, 2.8vw, 0.95rem);
+      --fs-cell: clamp(0.7rem, 2.4vw, 1.05rem);
       --fs-placeholder: clamp(0.6rem, 2vw, 0.85rem);
-      --fs-button:   clamp(0.75rem, 2.6vw, 1rem);
-      --fs-status:   clamp(1rem, 4.2vw, 1.4rem);
+      --fs-button: clamp(0.75rem, 2.6vw, 1rem);
+      --fs-status: clamp(1rem, 4.2vw, 1.4rem);
     }
-
     * { box-sizing: border-box; }
-
     html, body { margin: 0; padding: 0; min-height: 100%; }
-
     body {
       font-family: 'EB Garamond', Georgia, serif;
-      background: var(--dominant);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      position: relative;
-      overflow-x: hidden;
+      background: var(--dominant); color: var(--text);
+      min-height: 100vh; display: flex; justify-content: center; align-items: center;
+      padding: 20px; position: relative; overflow-x: hidden;
       -webkit-text-size-adjust: 100%;
     }
-
-    /* ---- Sand dunes background ---- */
-    .dunes {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .dunes svg {
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 200%;
-      height: 55vh;
-      min-height: 320px;
-      will-change: transform;
-    }
-
+    .dunes { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .dunes svg { position: absolute; left: 0; bottom: 0; width: 200%; height: 55vh; min-height: 320px; will-change: transform; }
     .dunes .dune { animation: dune-drift linear infinite; }
-
     .dunes .dune-3 { height: 62vh; min-height: 380px; opacity: 0.65; animation-duration: 22s; animation-direction: normal; }
     .dunes .dune-2 { height: 50vh; min-height: 320px; opacity: 0.85; animation-duration: 14s; animation-direction: reverse; }
     .dunes .dune-1 { height: 38vh; min-height: 250px; opacity: 1;    animation-duration: 8s;  animation-direction: normal; }
-
-    @keyframes dune-drift {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
+    @keyframes dune-drift { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     .dunes-glow {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
         radial-gradient(120% 60% at 50% 90%, rgba(217, 167, 82, 0.12) 0%, transparent 60%),
         radial-gradient(80% 40% at 20% 100%, rgba(217, 167, 82, 0.08) 0%, transparent 70%);
     }
+    @media (prefers-reduced-motion: reduce) { .dunes .dune { animation: none; } }
 
-    @media (prefers-reduced-motion: reduce) {
-      .dunes .dune { animation: none; }
-    }
-
-    /* ---- App card ---- */
     .app {
-      position: relative;
-      z-index: 1;
-      max-width: 1200px;
-      width: 100%;
+      position: relative; z-index: 1;
+      max-width: 1200px; width: 100%;
       background: var(--secondary);
-      border: 4px solid var(--accent);
-      border-radius: 12px;
+      border: 4px solid var(--accent); border-radius: 12px;
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(217, 167, 82, 0.25);
       padding: clamp(16px, 4vw, 30px);
     }
-
     header h1 {
       font-family: 'Cinzel Decorative', 'Cinzel', serif;
-      font-size: var(--fs-heading);
-      margin: 0 0 5px;
-      color: var(--accent);
-      text-shadow: 2px 2px 0 #0d1418;
-      text-align: center;
-      letter-spacing: 1px;
-      line-height: 1.15;
+      font-size: var(--fs-heading); margin: 0 0 5px;
+      color: var(--accent); text-shadow: 2px 2px 0 #0d1418;
+      text-align: center; letter-spacing: 1px; line-height: 1.15;
     }
-
-    header p {
-      font-style: italic;
-      font-size: var(--fs-sub);
-      color: #b9b09a;
-      text-align: center;
-      margin: 0 0 20px;
-      line-height: 1.4;
-    }
-
-    .workspace {
-      display: flex;
-      gap: clamp(16px, 3vw, 30px);
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    .editor {
-      flex: 1 1 320px;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .editor > label {
-      font-family: 'Cinzel', serif;
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: 1px;
-      font-size: var(--fs-label);
-    }
-
+    header p { font-style: italic; font-size: var(--fs-sub); color: #b9b09a; text-align: center; margin: 0 0 20px; line-height: 1.4; }
+    .workspace { display: flex; gap: clamp(16px, 3vw, 30px); flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+    .editor { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+    .editor > label { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); letter-spacing: 1px; font-size: var(--fs-label); }
     #card-title {
-      font-family: 'Cinzel', serif;
-      font-size: var(--fs-title);
-      font-weight: 700;
-      width: clamp(160px, 55%, 220px);
-      padding: 6px 10px;
-      background: var(--text);
-      border: 3px solid var(--accent);
-      border-radius: 6px;
-      color: var(--secondary);
-      text-align: center;
-      align-self: flex-start;
+      font-family: 'Cinzel', serif; font-size: var(--fs-title); font-weight: 700;
+      width: clamp(160px, 55%, 220px); padding: 6px 10px;
+      background: var(--text); border: 3px solid var(--accent);
+      border-radius: 6px; color: var(--secondary); text-align: center; align-self: flex-start;
     }
+    #card-title:read-only { background: #cdc5ab; }
 
-    #card-title:read-only {
-      background: #cdc5ab;
-    }
-
-    /* ---- 5x5 grid ---- */
     .grid-5x5 {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      display: grid; grid-template-columns: repeat(5, 1fr);
       gap: clamp(3px, 0.8vw, 6px);
       background: var(--dominant-dark);
       padding: clamp(5px, 1.2vw, 8px);
-      border: 3px solid var(--accent);
-      border-radius: 8px;
-      width: 100%;
-      max-width: 520px;
+      border: 3px solid var(--accent); border-radius: 8px;
+      width: 100%; max-width: 520px;
     }
-
-    /* ---- Cell: contenteditable div, wraps text, centers vertically ---- */
     .cell {
-      aspect-ratio: 1;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 4px;
+      aspect-ratio: 1; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 4px;
       font-family: 'Cinzel', serif;
-      font-size: max(var(--fs-cell), 12px);
-      font-weight: 600;
-      line-height: 1.15;
-      background: var(--text);
-      border: 2px solid var(--accent);
-      border-radius: 4px;
-      color: var(--secondary);
-      cursor: text;
-      overflow: hidden;
-      word-break: break-word;
-      overflow-wrap: anywhere;
+      font-size: max(var(--fs-cell), 12px); font-weight: 600; line-height: 1.15;
+      background: var(--text); border: 2px solid var(--accent);
+      border-radius: 4px; color: var(--secondary);
+      cursor: text; overflow: hidden;
+      word-break: break-word; overflow-wrap: anywhere;
       transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-      min-width: 0;
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
+      min-width: 0; outline: none; -webkit-tap-highlight-color: transparent;
     }
-
-    /* Placeholder (only when .cell is empty) */
     .cell.empty::before {
       content: attr(data-placeholder);
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      color: #8a8574;
-      font-style: italic;
-      font-weight: 400;
-      font-size: var(--fs-placeholder);
-      pointer-events: none;
-      white-space: nowrap;
+      color: #8a8574; font-style: italic; font-weight: 400;
+      font-size: var(--fs-placeholder); pointer-events: none; white-space: nowrap;
     }
-
-    .cell:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(217, 167, 82, 0.45), 0 0 10px rgba(217, 167, 82, 0.4);
-    }
-
-    /* Locked (play mode) */
-    .cell[contenteditable="false"] {
-      background: #cdc5ab;
-      cursor: default;
-    }
-
-    .cell.middle {
-      border-color: var(--accent);
-      box-shadow: inset 0 0 0 1px var(--accent-dark);
-      background: #f0e8cf;
-    }
-
-    .grid-5x5.playing .cell {
-      cursor: pointer;
-    }
-
-    .grid-5x5.playing .cell:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(217, 167, 82, 0.35);
-    }
-
+    .cell:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(217, 167, 82, 0.45), 0 0 10px rgba(217, 167, 82, 0.4); }
+    .cell[contenteditable="false"] { background: #cdc5ab; cursor: default; }
+    .cell.middle { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent-dark); background: #f0e8cf; }
+    .grid-5x5.playing .cell { cursor: pointer; }
+    .grid-5x5.playing .cell:hover { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(217, 167, 82, 0.35); }
     .cell.marked {
       background: linear-gradient(135deg, #1f3b4d 0%, #0f1c25 100%) !important;
-      color: var(--accent) !important;
-      border-color: var(--accent) !important;
+      color: var(--accent) !important; border-color: var(--accent) !important;
       box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6), 0 0 8px rgba(217, 167, 82, 0.5);
       text-shadow: 0 0 6px rgba(217, 167, 82, 0.7);
     }
+    .cell.marked.empty::before { color: rgba(217, 167, 82, 0.5); }
 
-    .cell.marked.empty::before {
-      color: rgba(217, 167, 82, 0.5);
-    }
-
-    /* ---- Buttons ---- */
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 4px;
-    }
-
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
     button {
       padding: clamp(9px, 2.4vw, 12px) clamp(14px, 3vw, 20px);
-      font-family: 'Cinzel', serif;
-      font-size: var(--fs-button);
-      font-weight: 700;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      font-family: 'Cinzel', serif; font-size: var(--fs-button); font-weight: 700;
+      border: none; border-radius: 8px; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 1px;
       transition: transform 0.1s, box-shadow 0.1s, background 0.2s, opacity 0.2s, color 0.2s;
-      flex: 1 1 auto;
-      min-width: 0;
-      white-space: nowrap;
+      flex: 1 1 auto; min-width: 0; white-space: nowrap;
     }
-
-    button:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    #play {
-      background: linear-gradient(to bottom, var(--accent), var(--accent-dark));
-      color: var(--secondary);
-      box-shadow: 0 4px 0 #4a3818;
-    }
+    button:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+    #play { background: linear-gradient(to bottom, var(--accent), var(--accent-dark)); color: var(--secondary); box-shadow: 0 4px 0 #4a3818; }
     #play:hover:not(:disabled) { background: linear-gradient(to bottom, #e6b862, #a07d33); }
     #play:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #4a3818; }
-    #play.active {
-      background: linear-gradient(to bottom, #8b2f2f, #5c1c1c);
-      color: var(--text);
-      box-shadow: 0 4px 0 #3a1010;
-    }
-    #play.active:hover { background: linear-gradient(to bottom, #a83838, #6e2323); }
-
-    #shuffle {
-      background: linear-gradient(to bottom, var(--dominant-light), var(--dominant-dark));
-      color: var(--text);
-      box-shadow: 0 4px 0 #0a141a;
-      border: 1px solid var(--accent);
-    }
+    #play.active { background: linear-gradient(to bottom, #8b2f2f, #5c1c1c); color: var(--text); box-shadow: 0 4px 0 #3a1010; }
+    #shuffle { background: linear-gradient(to bottom, var(--dominant-light), var(--dominant-dark)); color: var(--text); box-shadow: 0 4px 0 #0a141a; border: 1px solid var(--accent); }
     #shuffle:hover:not(:disabled) { background: linear-gradient(to bottom, #2c5165, #162a37); }
     #shuffle:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #0a141a; }
-
-    #clear {
-      background: linear-gradient(to bottom, #6e2b2b, #3f1717);
-      color: var(--text);
-      box-shadow: 0 4px 0 #250d0d;
-      border: 1px solid var(--accent);
-    }
+    #clear { background: linear-gradient(to bottom, #6e2b2b, #3f1717); color: var(--text); box-shadow: 0 4px 0 #250d0d; border: 1px solid var(--accent); }
     #clear:hover:not(:disabled) { background: linear-gradient(to bottom, #853636, #4d1c1c); }
     #clear:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #250d0d; }
-
-    #download {
-      background: linear-gradient(to bottom, var(--text), #c9bfa0);
-      color: var(--secondary);
-      box-shadow: 0 4px 0 #7d7458;
-    }
+    #download { background: linear-gradient(to bottom, var(--text), #c9bfa0); color: var(--secondary); box-shadow: 0 4px 0 #7d7458; }
     #download:hover:not(:disabled) { background: linear-gradient(to bottom, #f2ecd6, #d5cbb0); }
     #download:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #7d7458; }
+    #import { background: linear-gradient(to bottom, #4a5a68, #2c3844); color: var(--text); box-shadow: 0 4px 0 #1a232a; border: 1px solid var(--accent); }
+    #import:hover:not(:disabled) { background: linear-gradient(to bottom, #5b6e7e, #384654); }
+    #import:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #1a232a; }
 
     #bingo-status {
-      min-height: 32px;
-      font-family: 'Cinzel Decorative', 'Cinzel', serif;
-      font-size: var(--fs-status);
-      font-weight: 900;
-      text-align: center;
+      min-height: 32px; font-family: 'Cinzel Decorative', 'Cinzel', serif;
+      font-size: var(--fs-status); font-weight: 900; text-align: center;
       color: var(--accent);
       text-shadow: 0 0 12px rgba(217, 167, 82, 0.8), 2px 2px 0 #0d1418;
-      letter-spacing: 2px;
-      line-height: 1.3;
+      letter-spacing: 2px; line-height: 1.3;
     }
+    .preview { flex: 1 1 320px; min-width: 0; display: flex; justify-content: center; align-items: flex-start; }
+    #preview { width: 100%; max-width: 500px; height: auto; border: 4px solid var(--accent); border-radius: 8px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.55); }
+    #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
 
-    .preview {
-      flex: 1 1 320px;
-      min-width: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    #preview {
-      width: 100%;
-      max-width: 500px;
-      height: auto;
-      border: 4px solid var(--accent);
-      border-radius: 8px;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.55);
-    }
-
-    #confetti-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 9999;
-    }
-
-    /* ---- Mobile tweaks ---- */
     @media (max-width: 600px) {
       body { padding: 10px; align-items: flex-start; }
       .app { padding: 14px; border-width: 3px; border-radius: 10px; }
       .workspace { gap: 14px; }
       .editor, .preview { flex: 1 1 100%; }
-
       .grid-5x5 { gap: 3px; padding: 5px; }
       .cell { border-width: 1px; border-radius: 3px; padding: 3px; }
-
       #card-title { width: 100%; align-self: stretch; }
       .button-row { gap: 6px; }
       button { flex: 1 1 calc(50% - 6px); letter-spacing: 0.5px; }
     }
-
     @media (max-width: 380px) {
       header h1 { font-size: 1.35rem; letter-spacing: 0.5px; }
       header p { font-size: 0.8rem; }
       button { flex: 1 1 100%; }
     }
-
-    @media (max-height: 500px) {
-      body { align-items: flex-start; padding: 8px; }
-    }
+    @media (max-height: 500px) { body { align-items: flex-start; padding: 8px; } }
   </style>
 </head>
 <body>
-  <!-- Sand dunes background -->
   <div class="dunes-glow"></div>
   <div class="dunes" aria-hidden="true">
-    <svg class="dune dune-3" viewBox="0 0 1440 320" preserveAspectRatio="none">
-      <path fill="#4a423a" d="M0,200 C240,120 360,260 600,220 C840,180 960,80 1200,140 C1320,170 1400,220 1440,200 L1440,320 L0,320 Z"></path>
-    </svg>
-    <svg class="dune dune-2" viewBox="0 0 1440 320" preserveAspectRatio="none">
-      <path fill="#332d28" d="M0,240 C180,180 300,280 540,260 C780,240 900,160 1140,200 C1300,226 1400,260 1440,240 L1440,320 L0,320 Z"></path>
-      <path fill="#D9A752" fill-opacity="0.08" d="M0,250 C200,200 340,290 580,275 C820,260 940,200 1180,230 C1320,248 1400,265 1440,255 L1440,320 L0,320 Z"></path>
-    </svg>
-    <svg class="dune dune-1" viewBox="0 0 1440 320" preserveAspectRatio="none">
-      <path fill="#25211E" d="M0,280 C200,220 340,300 580,290 C820,280 940,220 1180,250 C1320,268 1400,290 1440,280 L1440,320 L0,320 Z"></path>
-      <path fill="#D9A752" fill-opacity="0.10" d="M0,290 C220,250 360,305 600,300 C840,295 960,260 1200,280 C1330,290 1400,300 1440,295 L1440,320 L0,320 Z"></path>
-    </svg>
+    <svg class="dune dune-3" viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#4a423a" d="M0,200 C240,120 360,260 600,220 C840,180 960,80 1200,140 C1320,170 1400,220 1440,200 L1440,320 L0,320 Z"></path></svg>
+    <svg class="dune dune-2" viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#332d28" d="M0,240 C180,180 300,280 540,260 C780,240 900,160 1140,200 C1300,226 1400,260 1440,240 L1440,320 L0,320 Z"></path><path fill="#D9A752" fill-opacity="0.08" d="M0,250 C200,200 340,290 580,275 C820,260 940,200 1180,230 C1320,248 1400,265 1440,255 L1440,320 L0,320 Z"></path></svg>
+    <svg class="dune dune-1" viewBox="0 0 1440 320" preserveAspectRatio="none"><path fill="#25211E" d="M0,280 C200,220 340,300 580,290 C820,280 940,220 1180,250 C1320,268 1400,290 1440,280 L1440,320 L0,320 Z"></path><path fill="#D9A752" fill-opacity="0.10" d="M0,290 C220,250 360,305 600,300 C840,295 960,260 1200,280 C1330,290 1400,300 1440,295 L1440,320 L0,320 Z"></path></svg>
   </div>
 
-  <!-- App -->
   <div class="app">
     <header>
       <h1>Merlin's Bingo</h1>
       <p>Forge thy card, brave knight. The centre square is sealed — it shall not move.</p>
     </header>
-
     <div class="workspace">
       <div class="editor">
         <label for="card-title">Card Title</label>
         <input id="card-title" type="text" value="BINGO" />
-
         <label>Your 5×5 Grid</label>
         <div id="grid" class="grid-5x5"></div>
-
         <div class="button-row">
           <button id="play">Play</button>
           <button id="shuffle">Shuffle</button>
           <button id="clear">Clear Board</button>
           <button id="download">Save as PNG</button>
+          <button id="import">Import Card</button>
         </div>
-
+        <input id="import-file" type="file" accept="image/png,image/*" style="display:none" />
         <div id="bingo-status"></div>
       </div>
-
       <div class="preview">
         <canvas id="preview" width="600" height="700"></canvas>
       </div>
@@ -450,66 +210,146 @@
 
   <canvas id="confetti-canvas"></canvas>
 
+  <!-- ==================================================================
+       JS helpers: reliable text measurement + PNG metadata + confetti
+       ================================================================== -->
   <script>
+    /* ---------- RELIABLE TEXT MEASUREMENT ----------
+       Pyodide's ctx.measureText().width comes back as a JsProxy that
+       can silently break comparison in Python. We route the measurement
+       through a plain JS function that returns a primitive Number, which
+       Pyodide converts cleanly to a Python float.
+    ------------------------------------------------- */
+    const _measureCanvas = document.createElement("canvas");
+    const _measureCtx = _measureCanvas.getContext("2d");
+    window.__measureText = function (font, text) {
+      _measureCtx.font = font;
+      const w = _measureCtx.measureText(text).width;
+      // Guard against 0/NaN — return a rough estimate so callers never get 0
+      if (!w || Number.isNaN(w)) return text.length * parseFloat(font) * 0.6;
+      return w;
+    };
+
+    /* ---------- CRC32 for PNG chunks ---------- */
+    const crcTable = (() => {
+      const t = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        t[n] = c >>> 0;
+      }
+      return t;
+    })();
+    function crc32(bytes) {
+      let c = 0xFFFFFFFF;
+      for (let i = 0; i < bytes.length; i++) c = crcTable[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+      return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+    function textToBytes(str) { return new TextEncoder().encode(str); }
+    function makeTextChunk(keyword, text) {
+      const kw = textToBytes(keyword);
+      const tx = textToBytes(text);
+      const data = new Uint8Array(kw.length + 1 + tx.length);
+      data.set(kw, 0); data[kw.length] = 0; data.set(tx, kw.length + 1);
+      const typeBytes = textToBytes("tEXt");
+      const crcInput = new Uint8Array(typeBytes.length + data.length);
+      crcInput.set(typeBytes, 0); crcInput.set(data, typeBytes.length);
+      const crc = crc32(crcInput);
+      const chunk = new Uint8Array(4 + 4 + data.length + 4);
+      const view = new DataView(chunk.buffer);
+      view.setUint32(0, data.length);
+      chunk.set(typeBytes, 4);
+      chunk.set(data, 8);
+      view.setUint32(8 + data.length, crc);
+      return chunk;
+    }
+    async function embedMetadataInPng(blob, jsonString) {
+      const buf = new Uint8Array(await blob.arrayBuffer());
+      const ihdrEnd = 8 + 4 + 4 + 13 + 4;
+      const chunk = makeTextChunk("BingoCard", jsonString);
+      const out = new Uint8Array(buf.length + chunk.length);
+      out.set(buf.subarray(0, ihdrEnd), 0);
+      out.set(chunk, ihdrEnd);
+      out.set(buf.subarray(ihdrEnd), ihdrEnd + chunk.length);
+      return new Blob([out], { type: "image/png" });
+    }
+    async function readMetadataFromPng(file) {
+      const buf = new Uint8Array(await file.arrayBuffer());
+      const sig = [137, 80, 78, 71, 13, 10, 26, 10];
+      for (let i = 0; i < 8; i++) if (buf[i] !== sig[i]) return null;
+      let offset = 8;
+      const decoder = new TextDecoder();
+      while (offset + 8 <= buf.length) {
+        const view = new DataView(buf.buffer, buf.byteOffset + offset);
+        const len = view.getUint32(0);
+        const type = decoder.decode(buf.subarray(offset + 4, offset + 8));
+        const dataStart = offset + 8;
+        const data = buf.subarray(dataStart, dataStart + len);
+        if (type === "tEXt") {
+          const sep = data.indexOf(0);
+          if (sep > 0) {
+            const keyword = decoder.decode(data.subarray(0, sep));
+            if (keyword === "BingoCard") return decoder.decode(data.subarray(sep + 1));
+          }
+        }
+        if (type === "IEND") break;
+        offset = dataStart + len + 4;
+      }
+      return null;
+    }
+    window.downloadBingoPng = function (canvas, jsonString) {
+      return new Promise((resolve) => {
+        canvas.toBlob(async (blob) => {
+          const enriched = await embedMetadataInPng(blob, jsonString);
+          const url = URL.createObjectURL(enriched);
+          const a = document.createElement("a");
+          a.href = url; a.download = "bingo-card.png";
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          URL.revokeObjectURL(url); resolve(true);
+        }, "image/png");
+      });
+    };
+    window.readBingoPngAndCall = function (file, callback) {
+      readMetadataFromPng(file).then((j) => callback(j || "")).catch(() => callback(""));
+    };
+
+    /* ---------- Confetti ---------- */
     window.startConfetti = function () {
       const canvas = document.getElementById("confetti-canvas");
       const ctx = canvas.getContext("2d");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
       const colors = ["#D9A752", "#EAE3CD", "#1A2E3B", "#25211E", "#e6b862", "#8a6a2b"];
-      const particles = [];
-      const count = 220;
-
+      const particles = []; const count = 220;
       for (let i = 0; i < count; i++) {
         particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height - canvas.height,
-          w: Math.random() * 10 + 5,
-          h: Math.random() * 6 + 4,
+          x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+          w: Math.random() * 10 + 5, h: Math.random() * 6 + 4,
           color: colors[Math.floor(Math.random() * colors.length)],
-          vy: Math.random() * 3 + 2,
-          vx: Math.random() * 2 - 1,
-          rot: Math.random() * Math.PI * 2,
-          vr: Math.random() * 0.2 - 0.1,
+          vy: Math.random() * 3 + 2, vx: Math.random() * 2 - 1,
+          rot: Math.random() * Math.PI * 2, vr: Math.random() * 0.2 - 0.1,
         });
       }
-
-      const startTime = Date.now();
-      const duration = 5000;
-
+      const startTime = Date.now(); const duration = 5000;
       function animate() {
         const elapsed = Date.now() - startTime;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         particles.forEach((p) => {
-          p.y += p.vy;
-          p.x += p.vx;
-          p.rot += p.vr;
-          if (p.y > canvas.height + 20) {
-            p.y = -20;
-            p.x = Math.random() * canvas.width;
-          }
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(p.rot);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          p.y += p.vy; p.x += p.vx; p.rot += p.vr;
+          if (p.y > canvas.height + 20) { p.y = -20; p.x = Math.random() * canvas.width; }
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
           ctx.restore();
         });
-
-        if (elapsed < duration) {
-          requestAnimationFrame(animate);
-        } else {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+        if (elapsed < duration) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-
       animate();
     };
   </script>
 
+  <!-- ================= Python (PyScript) ================= -->
   <script type="py">
+    import json
     import random
     from js import document, window
     from pyodide.ffi import create_proxy
@@ -518,7 +358,9 @@
     play_mode = False
     bingo_state = False
     marked = [False] * 25
-    MAX_CHARS = 40
+    MAX_CHARS = 60
+
+    FONT_FAMILY = "Cinzel, Georgia, serif"
 
     LINES = []
     for r in range(5):
@@ -528,7 +370,7 @@
     LINES.append([0, 6, 12, 18, 24])
     LINES.append([4, 8, 12, 16, 20])
 
-    # ---- Build the 5x5 grid of contenteditable divs ----
+    # ---- Build 5x5 grid ----
     grid_container = document.getElementById("grid")
     cells = []
     for i in range(25):
@@ -549,11 +391,77 @@
     play_btn = document.getElementById("play")
     shuffle_btn = document.getElementById("shuffle")
     clear_btn = document.getElementById("clear")
+    import_btn = document.getElementById("import")
+    import_input = document.getElementById("import-file")
     title_input = document.getElementById("card-title")
 
-    # -------------- helpers --------------
+    # ============================================================
+    # TEXT MEASUREMENT & WRAPPING (the fix)
+    # ============================================================
+    def measure_text(text, font_size):
+        """
+        Route measurement through a JS helper so we always get a plain
+        Python float — bypasses the Pyodide JsProxy comparison bug that
+        was making everything look like it fit on one line.
+        """
+        font = f"bold {int(font_size)}px {FONT_FAMILY}"
+        return float(window.__measureText(font, text))
+
+    def wrap_text(text, max_width, font_size):
+        """
+        Word-wrap, and if a single word is itself too wide (no spaces),
+        break it character-by-character so it never overflows.
+        """
+        words = text.split()
+        if not words:
+            return []
+
+        lines = []
+        current = ""
+
+        for word in words:
+            candidate = (current + " " + word) if current else word
+            if measure_text(candidate, font_size) <= max_width:
+                current = candidate
+                continue
+
+            # Word doesn't fit on the current line — flush the current line
+            if current:
+                lines.append(current)
+                current = ""
+
+            # Does the word fit on a fresh line?
+            if measure_text(word, font_size) <= max_width:
+                current = word
+                continue
+
+            # Word itself is too wide — break it at character level
+            remaining = word
+            while remaining:
+                # Binary search the longest prefix that fits
+                lo, hi, best = 1, len(remaining), 0
+                while lo <= hi:
+                    mid = (lo + hi) // 2
+                    if measure_text(remaining[:mid], font_size) <= max_width:
+                        best = mid
+                        lo = mid + 1
+                    else:
+                        hi = mid - 1
+
+                if best == 0:
+                    best = 1  # even one char is too wide — accept and move on
+                if best >= len(remaining):
+                    current = remaining
+                    remaining = ""
+                else:
+                    lines.append(remaining[:best])
+                    remaining = remaining[best:]
+
+        if current:
+            lines.append(current)
+        return lines
+
     def cell_text(cell):
-        """Return the cell's plain text with whitespace collapsed."""
         return " ".join(cell.textContent.split())
 
     def refresh_empty_class(cell):
@@ -566,25 +474,9 @@
         cell.textContent = value
         refresh_empty_class(cell)
 
-    # -------------- text wrapping for canvas --------------
-    def wrap_lines(text, max_width, font_size):
-        ctx.font = f"bold {font_size}px 'Cinzel', 'Georgia', serif"
-        words = text.split()
-        if not words:
-            return []
-        lines = []
-        current = words[0]
-        for word in words[1:]:
-            test = current + " " + word
-            if ctx.measureText(test).width <= max_width:
-                current = test
-            else:
-                lines.append(current)
-                current = word
-        lines.append(current)
-        return lines
-
-    # -------------- draw canvas --------------
+    # ============================================================
+    # DRAW CANVAS
+    # ============================================================
     def draw_card(*args):
         w = canvas.width
         h = canvas.height
@@ -592,26 +484,21 @@
 
         ctx.fillStyle = "#EAE3CD"
         ctx.fillRect(0, 0, w, h)
-
-        ctx.strokeStyle = "#D9A752"
-        ctx.lineWidth = 8
+        ctx.strokeStyle = "#D9A752"; ctx.lineWidth = 8
         ctx.strokeRect(4, 4, w - 8, h - 8)
-        ctx.strokeStyle = "#8a6a2b"
-        ctx.lineWidth = 2
+        ctx.strokeStyle = "#8a6a2b"; ctx.lineWidth = 2
         ctx.strokeRect(12, 12, w - 24, h - 24)
 
         title = title_input.value or "BINGO"
-        ctx.font = "bold 48px 'Cinzel Decorative', 'Cinzel', 'Georgia', serif"
+        ctx.font = f"bold 48px 'Cinzel Decorative', {FONT_FAMILY}"
         ctx.fillStyle = "#25211E"
-        ctx.textAlign = "center"
-        ctx.textBaseline = "middle"
+        ctx.textAlign = "center"; ctx.textBaseline = "middle"
         ctx.fillText(title, w / 2, 80)
 
         grid_top = 130
         grid_size = w - 60
         cell_size = grid_size / 5
-        start_x = 30
-        start_y = grid_top
+        start_x = 30; start_y = grid_top
 
         for row in range(5):
             for col in range(5):
@@ -621,58 +508,61 @@
 
                 is_marked = play_mode and marked[idx]
 
-                # Background
-                if is_marked:
-                    ctx.fillStyle = "#0f1c25"
-                elif idx == MIDDLE_INDEX:
-                    ctx.fillStyle = "#f0e8cf"
-                else:
-                    ctx.fillStyle = "#faf4e0"
+                if is_marked: ctx.fillStyle = "#0f1c25"
+                elif idx == MIDDLE_INDEX: ctx.fillStyle = "#f0e8cf"
+                else: ctx.fillStyle = "#faf4e0"
                 ctx.fillRect(x + 2, y + 2, cell_size - 4, cell_size - 4)
 
-                # Border
-                if is_marked or idx == MIDDLE_INDEX:
-                    ctx.strokeStyle = "#D9A752"
-                else:
-                    ctx.strokeStyle = "#8a6a2b"
+                if is_marked or idx == MIDDLE_INDEX: ctx.strokeStyle = "#D9A752"
+                else: ctx.strokeStyle = "#8a6a2b"
                 ctx.lineWidth = 3
                 ctx.strokeRect(x + 2, y + 2, cell_size - 4, cell_size - 4)
 
-                # Text (wrapped, auto-shrunk to fit)
                 text = cell_text(cells[idx])
-                max_width = cell_size - 14
-                max_height = cell_size - 14
+                max_w = cell_size - 18   # a bit more padding to be safe
+                max_h = cell_size - 18
 
                 if text:
-                    # Shrink font until wrapped text fits both dimensions
-                    font_size = 26
-                    while font_size > 8:
-                        lines = wrap_lines(text, max_width, font_size)
-                        line_height = font_size * 1.15
-                        total_height = len(lines) * line_height
-                        widest = max((ctx.measureText(l).width for l in lines), default=0)
-                        if total_height <= max_height and widest <= max_width:
+                    # Find the largest font size whose wrapped block fits
+                    chosen_fs = 8
+                    chosen_lines = wrap_text(text, max_w, 8)
+
+                    for fs in range(26, 7, -1):
+                        lines = wrap_text(text, max_w, fs)
+                        if not lines:
+                            continue
+                        line_h = fs * 1.15
+                        total_h = len(lines) * line_h
+                        widest = max((measure_text(l, fs) for l in lines), default=0)
+                        if total_h <= max_h and widest <= max_w:
+                            chosen_fs = fs
+                            chosen_lines = lines
                             break
-                        font_size -= 1
 
-                    ctx.font = f"bold {font_size}px 'Cinzel', 'Georgia', serif"
+                    # FINAL SAFETY: if even the smallest size still overflows,
+                    # split the longest line further so it definitely fits.
+                    if measure_text(max(chosen_lines, key=lambda s: measure_text(s, chosen_fs)), chosen_fs) > max_w:
+                        chosen_fs = 8
+                        chosen_lines = wrap_text(text, max_w, chosen_fs)
+
+                    ctx.font = f"bold {chosen_fs}px {FONT_FAMILY}"
                     ctx.fillStyle = "#D9A752" if is_marked else "#25211E"
-                    ctx.textAlign = "center"
-                    ctx.textBaseline = "middle"
+                    ctx.textAlign = "center"; ctx.textBaseline = "middle"
 
-                    line_height = font_size * 1.15
-                    total_height = len(lines) * line_height
-                    first_y = y + cell_size / 2 - total_height / 2 + line_height / 2
-                    for i, line in enumerate(lines):
-                        ctx.fillText(line, x + cell_size / 2, first_y + i * line_height)
+                    line_h = chosen_fs * 1.15
+                    total_h = len(chosen_lines) * line_h
+                    first_y = y + cell_size / 2 - total_h / 2 + line_h / 2
+                    for i, line in enumerate(chosen_lines):
+                        ctx.fillText(line, x + cell_size / 2, first_y + i * line_h)
                 else:
-                    ctx.font = "italic 14px 'EB Garamond', 'Georgia', serif"
+                    ctx.font = f"italic 14px 'EB Garamond', Georgia, serif"
                     ctx.fillStyle = "#8a8574" if not is_marked else "rgba(217,167,82,0.5)"
-                    ctx.textAlign = "center"
-                    ctx.textBaseline = "middle"
+                    ctx.textAlign = "center"; ctx.textBaseline = "middle"
                     ctx.fillText("...", x + cell_size / 2, y + cell_size / 2)
 
-    # -------------- bingo check --------------
+    # ============================================================
+    # BINGO / PLAY MODE / EDIT EVENTS
+    # ============================================================
     def check_bingo():
         global bingo_state
         is_bingo = any(all(marked[i] for i in line) for line in LINES)
@@ -685,50 +575,38 @@
             status.textContent = ""
         bingo_state = is_bingo
 
-    # -------------- cell event handlers --------------
     def handle_input(event):
         cell = event.target
-        # Enforce character limit
         if len(cell.textContent) > MAX_CHARS:
             cell.textContent = cell.textContent[:MAX_CHARS]
-            # Move cursor to end after trimming
             rng = document.createRange()
             rng.selectNodeContents(cell)
             rng.collapse(False)
             sel = window.getSelection()
-            sel.removeAllRanges()
-            sel.addRange(rng)
+            sel.removeAllRanges(); sel.addRange(rng)
         refresh_empty_class(cell)
         draw_card()
 
     def handle_click(event):
-        if not play_mode:
-            return
+        if not play_mode: return
         idx = int(event.target.dataset.idx)
         marked[idx] = not marked[idx]
-        if marked[idx]:
-            cells[idx].classList.add("marked")
-        else:
-            cells[idx].classList.remove("marked")
-        check_bingo()
-        draw_card()
+        if marked[idx]: cells[idx].classList.add("marked")
+        else: cells[idx].classList.remove("marked")
+        check_bingo(); draw_card()
 
     def prevent_enter(event):
-        if event.key == "Enter":
-            event.preventDefault()
+        if event.key == "Enter": event.preventDefault()
 
     def handle_paste(event):
-        # Force plain-text paste to prevent HTML injection
         event.preventDefault()
         text = event.clipboardData.getData("text/plain")
-        # Insert at cursor (or replace selection)
         sel = window.getSelection()
         if sel.rangeCount:
             sel.deleteFromDocument()
             sel.getRangeAt(0).insertNode(document.createTextNode(text))
             sel.collapseToEnd()
 
-    # Shared proxies (created once)
     input_proxy = create_proxy(handle_input)
     click_proxy = create_proxy(handle_click)
     enter_proxy = create_proxy(prevent_enter)
@@ -740,105 +618,115 @@
         cell.addEventListener("keydown", enter_proxy)
         cell.addEventListener("paste", paste_proxy)
 
-    # -------------- play mode --------------
     def toggle_play(*args):
         global play_mode, bingo_state
         play_mode = not play_mode
-
         if play_mode:
             for i in range(25):
                 marked[i] = False
                 cells[i].classList.remove("marked")
             marked[MIDDLE_INDEX] = True
             cells[MIDDLE_INDEX].classList.add("marked")
-
             play_btn.textContent = "Stop Playing"
             play_btn.classList.add("active")
             grid_container.classList.add("playing")
-
-            for cell in cells:
-                cell.setAttribute("contenteditable", "false")
-
+            for cell in cells: cell.setAttribute("contenteditable", "false")
             title_input.readOnly = True
-            shuffle_btn.disabled = True
-            clear_btn.disabled = True
+            shuffle_btn.disabled = True; clear_btn.disabled = True
+            import_btn.disabled = True
             status.textContent = "Mark your squares!"
-            bingo_state = False
-            check_bingo()
+            bingo_state = False; check_bingo()
         else:
             play_btn.textContent = "Play"
             play_btn.classList.remove("active")
             grid_container.classList.remove("playing")
-
             for cell in cells:
                 cell.setAttribute("contenteditable", "true")
                 cell.classList.remove("marked")
-
             title_input.readOnly = False
-            shuffle_btn.disabled = False
-            clear_btn.disabled = False
-
-            for i in range(25):
-                marked[i] = False
-            bingo_state = False
-            status.textContent = ""
-
+            shuffle_btn.disabled = False; clear_btn.disabled = False
+            import_btn.disabled = False
+            for i in range(25): marked[i] = False
+            bingo_state = False; status.textContent = ""
         draw_card()
 
-    # -------------- clear --------------
     def clear_board(*args):
-        if play_mode:
-            return
-        for cell in cells:
-            set_cell(cell, "")
+        if play_mode: return
+        for cell in cells: set_cell(cell, "")
         draw_card()
 
-    # -------------- shuffle (middle stays) --------------
     def shuffle_board(*args):
-        if play_mode:
-            return
+        if play_mode: return
         middle_value = cell_text(cells[MIDDLE_INDEX])
-
         values = []
         for i, cell in enumerate(cells):
-            if i == MIDDLE_INDEX:
-                continue
+            if i == MIDDLE_INDEX: continue
             txt = cell_text(cell)
-            if txt != "":
-                values.append(txt)
-
+            if txt != "": values.append(txt)
         random.shuffle(values)
-
         vi = 0
         for i, cell in enumerate(cells):
-            if i == MIDDLE_INDEX:
-                continue
+            if i == MIDDLE_INDEX: continue
             if vi < len(values):
-                set_cell(cell, values[vi])
-                vi += 1
+                set_cell(cell, values[vi]); vi += 1
             else:
                 set_cell(cell, "")
         set_cell(cells[MIDDLE_INDEX], middle_value)
         draw_card()
 
-    # -------------- download PNG --------------
     def download_png(*args):
-        data_url = canvas.toDataURL("image/png")
-        link = document.createElement("a")
-        link.href = data_url
-        link.download = "bingo-card.png"
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        meta = {"v": 1, "title": title_input.value,
+                "cells": [cell_text(c) for c in cells]}
+        window.downloadBingoPng(canvas, json.dumps(meta, ensure_ascii=False))
 
-    # -------------- wire up --------------
+    def trigger_import(*args):
+        import_input.value = ""
+        import_input.click()
+
+    def on_import_result(json_str):
+        if not json_str:
+            status.textContent = "⚠ No bingo data found in that image."
+            return
+        try:
+            data = json.loads(str(json_str))
+        except Exception:
+            status.textContent = "⚠ Could not read card data."
+            return
+        title_input.value = data.get("title", "BINGO")
+        imported_cells = data.get("cells", [])
+        for i, c in enumerate(cells):
+            val = imported_cells[i] if i < len(imported_cells) else ""
+            set_cell(c, val if val is not None else "")
+        if play_mode: toggle_play()
+        draw_card()
+        status.textContent = "✓ Card imported!"
+
+    def handle_import(event):
+        files = event.target.files
+        if not files or files.length == 0: return
+        file = files.item(0)   # FileList is not a real Array
+        window.readBingoPngAndCall(file, create_proxy(on_import_result))
+
     title_input.addEventListener("input", create_proxy(draw_card))
     document.getElementById("download").addEventListener("click", create_proxy(download_png))
     shuffle_btn.addEventListener("click", create_proxy(shuffle_board))
     clear_btn.addEventListener("click", create_proxy(clear_board))
     play_btn.addEventListener("click", create_proxy(toggle_play))
+    import_btn.addEventListener("click", create_proxy(trigger_import))
+    import_input.addEventListener("change", create_proxy(handle_import))
 
     draw_card()
+
+    # Redraw once the web fonts finish loading so measurements match reality
+    window.__bingoRedraw = create_proxy(draw_card)
+  </script>
+
+  <script>
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        if (window.__bingoRedraw) window.__bingoRedraw();
+      });
+    }
   </script>
 </body>
 </html>
