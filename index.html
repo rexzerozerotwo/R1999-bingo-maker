@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bingo Maker</title>
+  <meta name="description" content="Create a 5x5 bingo card with your own text and save it as a PNG." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -186,11 +187,10 @@
       text-shadow: 0 0 12px rgba(217, 167, 82, 0.8), 2px 2px 0 #0d1418;
       letter-spacing: 2px; line-height: 1.3;
     }
-    /* ---------- BIGGER PREVIEW ---------- */
     .preview { flex: 1 1 500px; min-width: 0; display: flex; justify-content: center; align-items: flex-start; }
     #preview {
       width: 100%;
-      max-width: 760px;             /* was 560px */
+      max-width: 760px;
       height: auto;
       border: 4px solid var(--accent);
       border-radius: 10px;
@@ -296,8 +296,8 @@
 
   <div class="app">
     <header>
-      <h1>R1999 4.0 Stream Bingo</h1>
-      <p>Forge thy card, brave knight. The centre square is sealed — it shall not move.</p>
+      <h1>Bingo Maker</h1>
+      <p>Create your own 5×5 bingo card. The centre square is sealed — it shall not move.</p>
       <button id="help-btn" title="How to use" aria-label="How to use"></button>
     </header>
 
@@ -308,7 +308,7 @@
 
         <label>Your 5×5 Grid</label>
         <div id="grid" class="grid-5x5"></div>
-        <p class="hint-line">Tap any square to type. Text wraps and shrinks to fit. <strong>Centre square</strong> is the free space.</p>
+        <p class="hint-line">Tap any square to type. Short entries up to 12 chars stay on one line and shrink to fit; longer text wraps. <strong>Centre square</strong> is the free space.</p>
 
         <div class="button-row">
           <button id="play">Play</button>
@@ -323,7 +323,6 @@
       </div>
 
       <div class="preview">
-        <!-- BIGGER canvas: 900 × 1050 (was 600 × 700) -->
         <canvas id="preview" width="900" height="1050"></canvas>
       </div>
     </div>
@@ -336,7 +335,7 @@
       <p class="modal-sub">A quick guide to every button and feature.</p>
       <ul class="feature-list">
         <li><span class="badge">Title</span><div class="text"><strong>Card Title</strong>The heading shown at the top of your card. Defaults to <em>BINGO</em> — change it to anything you like.</div></li>
-        <li><span class="badge">Grid</span><div class="text"><strong>5 × 5 Grid</strong>Click or tap any square to type. Long text wraps onto multiple lines and shrinks to fit — no need to shorten it. Up to 60 characters per square.</div></li>
+        <li><span class="badge">Grid</span><div class="text"><strong>5 × 5 Grid</strong>Click or tap any square to type. Entries up to 12 characters stay on a single line and shrink to fit — longer entries wrap onto multiple lines.</div></li>
         <li><span class="badge alt">Centre</span><div class="text"><strong>Centre Square (Free Space)</strong>The middle square is highlighted in gold. It stays fixed when you shuffle, and is auto-marked when you press Play.</div></li>
         <li><span class="badge">Play</span><div class="text"><strong>Play Button</strong>Locks the grid so it can't be edited. Click any square to <em>stamp</em> it — handy for tracking what's been called. Press again to stop playing and unlock.</div></li>
         <li><span class="badge alt">Shuffle</span><div class="text"><strong>Shuffle</strong>Randomly rearranges every filled square (the centre stays put). Great for generating a fresh card without retyping.</div></li>
@@ -495,6 +494,7 @@
     bingo_state = False
     marked = [False] * 25
     MAX_CHARS = 60
+    SINGLE_LINE_LIMIT = 12   # ≤ this many chars stays on one line (shrinks to fit)
 
     FONT_FAMILY = "Cinzel, Georgia, serif"
 
@@ -551,6 +551,7 @@
             if measure_text(word, font_size) <= max_width:
                 current = word
                 continue
+            # Word itself too wide — break character-by-character
             remaining = word
             while remaining:
                 lo, hi, best = 1, len(remaining), 0
@@ -573,6 +574,34 @@
             lines.append(current)
         return lines
 
+    def fit_text_for_cell(text, max_w, max_h):
+        """
+        Choose a font size and line layout for a cell.
+
+        Rule:
+          - If the text is <= SINGLE_LINE_LIMIT characters, force a single
+            line and shrink the font until it fits the cell width.
+          - Otherwise, wrap normally and shrink until the wrapped block fits.
+        """
+        force_single_line = len(text) <= SINGLE_LINE_LIMIT
+
+        for fs in range(60, 9, -1):
+            if force_single_line:
+                lines = [text]
+            else:
+                lines = wrap_text(text, max_w, fs)
+            if not lines:
+                continue
+            line_h = fs * 1.15
+            total_h = len(lines) * line_h
+            widest = max((measure_text(l, fs) for l in lines), default=0)
+            if widest <= max_w and total_h <= max_h:
+                return fs, lines
+
+        if force_single_line:
+            return 10, [text]
+        return 10, wrap_text(text, max_w, 10)
+
     def cell_text(cell):
         return " ".join(cell.textContent.split())
 
@@ -586,35 +615,28 @@
         cell.textContent = value
         refresh_empty_class(cell)
 
-    # ============================================================
-    # DRAW CANVAS — 900 × 1050, everything scaled up 1.5× from original
-    # ============================================================
     def draw_card(*args):
         w = canvas.width
         h = canvas.height
         ctx.clearRect(0, 0, w, h)
 
-        # Parchment background
         ctx.fillStyle = "#EAE3CD"
         ctx.fillRect(0, 0, w, h)
 
-        # Outer + inner borders (thicker)
         ctx.strokeStyle = "#D9A752"; ctx.lineWidth = 12
         ctx.strokeRect(6, 6, w - 12, h - 12)
         ctx.strokeStyle = "#8a6a2b"; ctx.lineWidth = 3
         ctx.strokeRect(18, 18, w - 36, h - 36)
 
-        # Title — larger font
         title = title_input.value or "BINGO"
         ctx.font = f"bold 72px 'Cinzel Decorative', {FONT_FAMILY}"
         ctx.fillStyle = "#25211E"
         ctx.textAlign = "center"; ctx.textBaseline = "middle"
         ctx.fillText(title, w / 2, 120)
 
-        # Grid geometry
         grid_top = 195
-        grid_size = w - 90          # 810
-        cell_size = grid_size / 5   # 162 (was 108)
+        grid_size = w - 90
+        cell_size = grid_size / 5
         start_x = 45
         start_y = grid_top
 
@@ -640,25 +662,7 @@
                 max_h = cell_size - 26
 
                 if text:
-                    chosen_fs = 10
-                    chosen_lines = wrap_text(text, max_w, 10)
-                    # Try font sizes from 44 down to 10
-                    for fs in range(44, 9, -1):
-                        lines = wrap_text(text, max_w, fs)
-                        if not lines:
-                            continue
-                        line_h = fs * 1.15
-                        total_h = len(lines) * line_h
-                        widest = max((measure_text(l, fs) for l in lines), default=0)
-                        if total_h <= max_h and widest <= max_w:
-                            chosen_fs = fs
-                            chosen_lines = lines
-                            break
-
-                    # Safety: if the widest line still overflows, drop to 10
-                    if measure_text(max(chosen_lines, key=lambda s: measure_text(s, chosen_fs)), chosen_fs) > max_w:
-                        chosen_fs = 10
-                        chosen_lines = wrap_text(text, max_w, chosen_fs)
+                    chosen_fs, chosen_lines = fit_text_for_cell(text, max_w, max_h)
 
                     ctx.font = f"bold {chosen_fs}px {FONT_FAMILY}"
                     ctx.fillStyle = "#D9A752" if is_marked else "#25211E"
