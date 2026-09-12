@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bingo Maker</title>
+  <title>Merlin's Bingo — Knight's Card Maker</title>
   <meta name="description" content="Create a 5x5 bingo card with your own text and save it as a PNG." />
 
   <!-- Fonts -->
@@ -16,7 +16,6 @@
   <script type="module" src="https://pyscript.net/releases/2024.11.1/core.js"></script>
 
   <style>
-    /* ---------- Theme variables ---------- */
     :root {
       --dominant: #1A2E3B;
       --secondary: #25211E;
@@ -26,26 +25,19 @@
       --dominant-light: #24414f;
       --dominant-dark: #0f1c25;
 
-      /* --- Responsive type scale (adjusts with viewport) --- */
-      --fs-title:    clamp(1.4rem, 5.5vw, 2.5rem);   /* card title input */
-      --fs-heading:  clamp(1.6rem, 6.5vw, 2.5rem);   /* app h1 */
-      --fs-sub:      clamp(0.85rem, 3vw, 1rem);      /* subtitle */
-      --fs-label:    clamp(0.8rem, 2.8vw, 0.95rem);  /* labels */
-      --fs-cell:     clamp(0.7rem, 2.6vw, 1.1rem);   /* grid cell text */
+      --fs-title:    clamp(1.4rem, 5.5vw, 2.5rem);
+      --fs-heading:  clamp(1.6rem, 6.5vw, 2.5rem);
+      --fs-sub:      clamp(0.85rem, 3vw, 1rem);
+      --fs-label:    clamp(0.8rem, 2.8vw, 0.95rem);
+      --fs-cell:     clamp(0.7rem, 2.4vw, 1.05rem);
       --fs-placeholder: clamp(0.6rem, 2vw, 0.85rem);
       --fs-button:   clamp(0.75rem, 2.6vw, 1rem);
       --fs-status:   clamp(1rem, 4.2vw, 1.4rem);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-    }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
 
     body {
       font-family: 'EB Garamond', Georgia, serif;
@@ -58,12 +50,10 @@
       padding: 20px;
       position: relative;
       overflow-x: hidden;
-      -webkit-text-size-adjust: 100%; /* stop iOS from auto-zooming text */
+      -webkit-text-size-adjust: 100%;
     }
 
-    /* ============================================================
-       SAND DUNES BACKGROUND
-       ============================================================ */
+    /* ---- Sand dunes background ---- */
     .dunes {
       position: fixed;
       inset: 0;
@@ -82,33 +72,11 @@
       will-change: transform;
     }
 
-    .dunes .dune {
-      animation: dune-drift linear infinite;
-    }
+    .dunes .dune { animation: dune-drift linear infinite; }
 
-    .dunes .dune-3 {
-      height: 62vh;
-      min-height: 380px;
-      opacity: 0.65;
-      animation-duration: 22s;
-      animation-direction: normal;
-    }
-
-    .dunes .dune-2 {
-      height: 50vh;
-      min-height: 320px;
-      opacity: 0.85;
-      animation-duration: 14s;
-      animation-direction: reverse;
-    }
-
-    .dunes .dune-1 {
-      height: 38vh;
-      min-height: 250px;
-      opacity: 1;
-      animation-duration: 8s;
-      animation-direction: normal;
-    }
+    .dunes .dune-3 { height: 62vh; min-height: 380px; opacity: 0.65; animation-duration: 22s; animation-direction: normal; }
+    .dunes .dune-2 { height: 50vh; min-height: 320px; opacity: 0.85; animation-duration: 14s; animation-direction: reverse; }
+    .dunes .dune-1 { height: 38vh; min-height: 250px; opacity: 1;    animation-duration: 8s;  animation-direction: normal; }
 
     @keyframes dune-drift {
       0%   { transform: translateX(0); }
@@ -129,9 +97,7 @@
       .dunes .dune { animation: none; }
     }
 
-    /* ============================================================
-       APP CARD
-       ============================================================ */
+    /* ---- App card ---- */
     .app {
       position: relative;
       z-index: 1;
@@ -188,7 +154,6 @@
       font-size: var(--fs-label);
     }
 
-    /* Card title input */
     #card-title {
       font-family: 'Cinzel', serif;
       font-size: var(--fs-title);
@@ -207,7 +172,7 @@
       background: #cdc5ab;
     }
 
-    /* 5x5 grid */
+    /* ---- 5x5 grid ---- */
     .grid-5x5 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -220,42 +185,57 @@
       max-width: 520px;
     }
 
-    /* Inner textboxes — everything scales with viewport */
+    /* ---- Cell: contenteditable div, wraps text, centers vertically ---- */
     .cell {
       aspect-ratio: 1;
-      padding: 2px;
-      font-family: 'Cinzel', serif;
-      font-size: var(--fs-cell);
-      font-weight: 600;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
+      padding: 4px;
+      font-family: 'Cinzel', serif;
+      font-size: max(var(--fs-cell), 12px);
+      font-weight: 600;
+      line-height: 1.15;
       background: var(--text);
       border: 2px solid var(--accent);
       border-radius: 4px;
       color: var(--secondary);
-      transition: all 0.2s;
+      cursor: text;
+      overflow: hidden;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
       min-width: 0;
-      width: 100%;
-      /* stop iOS auto-zoom on focus by keeping font >= 16px */
-      font-size: max(var(--fs-cell), 16px);
-      line-height: 1.1;
-      text-overflow: ellipsis;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .cell::placeholder {
-      font-size: var(--fs-placeholder);
-      font-style: italic;
+    /* Placeholder (only when .cell is empty) */
+    .cell.empty::before {
+      content: attr(data-placeholder);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: #8a8574;
+      font-style: italic;
       font-weight: 400;
+      font-size: var(--fs-placeholder);
+      pointer-events: none;
+      white-space: nowrap;
     }
 
     .cell:focus {
-      outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 2px rgba(217, 167, 82, 0.45), 0 0 10px rgba(217, 167, 82, 0.4);
     }
 
-    .cell:read-only {
+    /* Locked (play mode) */
+    .cell[contenteditable="false"] {
       background: #cdc5ab;
+      cursor: default;
     }
 
     .cell.middle {
@@ -264,7 +244,6 @@
       background: #f0e8cf;
     }
 
-    /* Play mode */
     .grid-5x5.playing .cell {
       cursor: pointer;
     }
@@ -275,14 +254,18 @@
     }
 
     .cell.marked {
-      background: linear-gradient(135deg, #1f3b4d 0%, #0f1c25 100%);
-      color: var(--accent);
-      border-color: var(--accent);
+      background: linear-gradient(135deg, #1f3b4d 0%, #0f1c25 100%) !important;
+      color: var(--accent) !important;
+      border-color: var(--accent) !important;
       box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6), 0 0 8px rgba(217, 167, 82, 0.5);
       text-shadow: 0 0 6px rgba(217, 167, 82, 0.7);
     }
 
-    /* Buttons */
+    .cell.marked.empty::before {
+      color: rgba(217, 167, 82, 0.5);
+    }
+
+    /* ---- Buttons ---- */
     .button-row {
       display: flex;
       flex-wrap: wrap;
@@ -317,25 +300,14 @@
       color: var(--secondary);
       box-shadow: 0 4px 0 #4a3818;
     }
-
-    #play:hover:not(:disabled) {
-      background: linear-gradient(to bottom, #e6b862, #a07d33);
-    }
-
-    #play:active:not(:disabled) {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #4a3818;
-    }
-
+    #play:hover:not(:disabled) { background: linear-gradient(to bottom, #e6b862, #a07d33); }
+    #play:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #4a3818; }
     #play.active {
       background: linear-gradient(to bottom, #8b2f2f, #5c1c1c);
       color: var(--text);
       box-shadow: 0 4px 0 #3a1010;
     }
-
-    #play.active:hover {
-      background: linear-gradient(to bottom, #a83838, #6e2323);
-    }
+    #play.active:hover { background: linear-gradient(to bottom, #a83838, #6e2323); }
 
     #shuffle {
       background: linear-gradient(to bottom, var(--dominant-light), var(--dominant-dark));
@@ -343,15 +315,8 @@
       box-shadow: 0 4px 0 #0a141a;
       border: 1px solid var(--accent);
     }
-
-    #shuffle:hover:not(:disabled) {
-      background: linear-gradient(to bottom, #2c5165, #162a37);
-    }
-
-    #shuffle:active:not(:disabled) {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #0a141a;
-    }
+    #shuffle:hover:not(:disabled) { background: linear-gradient(to bottom, #2c5165, #162a37); }
+    #shuffle:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #0a141a; }
 
     #clear {
       background: linear-gradient(to bottom, #6e2b2b, #3f1717);
@@ -359,30 +324,16 @@
       box-shadow: 0 4px 0 #250d0d;
       border: 1px solid var(--accent);
     }
-
-    #clear:hover:not(:disabled) {
-      background: linear-gradient(to bottom, #853636, #4d1c1c);
-    }
-
-    #clear:active:not(:disabled) {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #250d0d;
-    }
+    #clear:hover:not(:disabled) { background: linear-gradient(to bottom, #853636, #4d1c1c); }
+    #clear:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #250d0d; }
 
     #download {
       background: linear-gradient(to bottom, var(--text), #c9bfa0);
       color: var(--secondary);
       box-shadow: 0 4px 0 #7d7458;
     }
-
-    #download:hover:not(:disabled) {
-      background: linear-gradient(to bottom, #f2ecd6, #d5cbb0);
-    }
-
-    #download:active:not(:disabled) {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #7d7458;
-    }
+    #download:hover:not(:disabled) { background: linear-gradient(to bottom, #f2ecd6, #d5cbb0); }
+    #download:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #7d7458; }
 
     #bingo-status {
       min-height: 32px;
@@ -413,7 +364,6 @@
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.55);
     }
 
-    /* Confetti overlay */
     #confetti-canvas {
       position: fixed;
       top: 0;
@@ -424,90 +374,34 @@
       z-index: 9999;
     }
 
-    /* ============================================================
-       MOBILE TWEAKS
-       ============================================================ */
+    /* ---- Mobile tweaks ---- */
     @media (max-width: 600px) {
-      body {
-        padding: 10px;
-        align-items: flex-start;
-      }
+      body { padding: 10px; align-items: flex-start; }
+      .app { padding: 14px; border-width: 3px; border-radius: 10px; }
+      .workspace { gap: 14px; }
+      .editor, .preview { flex: 1 1 100%; }
 
-      .app {
-        padding: 14px;
-        border-width: 3px;
-        border-radius: 10px;
-      }
+      .grid-5x5 { gap: 3px; padding: 5px; }
+      .cell { border-width: 1px; border-radius: 3px; padding: 3px; }
 
-      /* Stack editor and preview vertically */
-      .workspace {
-        gap: 14px;
-      }
-
-      .editor,
-      .preview {
-        flex: 1 1 100%;
-      }
-
-      /* Hide the live canvas preview on very small screens to save space */
-      /* (uncomment the next rule if you want the PNG preview hidden) */
-      /*
-      .preview { display: none; }
-      */
-
-      .grid-5x5 {
-        gap: 3px;
-        padding: 5px;
-      }
-
-      .cell {
-        border-width: 1px;
-        border-radius: 3px;
-        padding: 1px;
-      }
-
-      #card-title {
-        width: 100%;
-        align-self: stretch;
-      }
-
-      .button-row {
-        gap: 6px;
-      }
-
-      button {
-        flex: 1 1 calc(50% - 6px);
-        letter-spacing: 0.5px;
-      }
+      #card-title { width: 100%; align-self: stretch; }
+      .button-row { gap: 6px; }
+      button { flex: 1 1 calc(50% - 6px); letter-spacing: 0.5px; }
     }
 
-    /* Extra small phones */
     @media (max-width: 380px) {
-      header h1 {
-        font-size: 1.35rem;
-        letter-spacing: 0.5px;
-      }
-
-      header p {
-        font-size: 0.8rem;
-      }
-
-      button {
-        flex: 1 1 100%;
-      }
+      header h1 { font-size: 1.35rem; letter-spacing: 0.5px; }
+      header p { font-size: 0.8rem; }
+      button { flex: 1 1 100%; }
     }
 
-    /* Landscape phones / short viewports */
     @media (max-height: 500px) {
-      body {
-        align-items: flex-start;
-        padding: 8px;
-      }
+      body { align-items: flex-start; padding: 8px; }
     }
   </style>
 </head>
 <body>
-  <!-- ============ Sand dunes background ============ -->
+  <!-- Sand dunes background -->
   <div class="dunes-glow"></div>
   <div class="dunes" aria-hidden="true">
     <svg class="dune dune-3" viewBox="0 0 1440 320" preserveAspectRatio="none">
@@ -523,10 +417,10 @@
     </svg>
   </div>
 
-  <!-- ============ App ============ -->
+  <!-- App -->
   <div class="app">
     <header>
-      <h1>R1999 4.0 Stream Bingo</h1>
+      <h1>Merlin's Bingo</h1>
       <p>Forge thy card, brave knight. The centre square is sealed — it shall not move.</p>
     </header>
 
@@ -624,6 +518,7 @@
     play_mode = False
     bingo_state = False
     marked = [False] * 25
+    MAX_CHARS = 40
 
     LINES = []
     for r in range(5):
@@ -633,19 +528,20 @@
     LINES.append([0, 6, 12, 18, 24])
     LINES.append([4, 8, 12, 16, 20])
 
+    # ---- Build the 5x5 grid of contenteditable divs ----
     grid_container = document.getElementById("grid")
-    inputs = []
+    cells = []
     for i in range(25):
-        inp = document.createElement("input")
-        inp.type = "text"
-        inp.id = f"cell-{i}"
-        inp.className = "cell"
-        inp.maxLength = 20
-        inp.placeholder = "..."
+        cell = document.createElement("div")
+        cell.className = "cell empty"
+        cell.setAttribute("contenteditable", "true")
+        cell.setAttribute("spellcheck", "false")
+        cell.setAttribute("data-placeholder", "...")
+        cell.setAttribute("data-idx", str(i))
         if i == MIDDLE_INDEX:
-            inp.classList.add("middle")
-        grid_container.appendChild(inp)
-        inputs.append(inp)
+            cell.classList.add("middle")
+        grid_container.appendChild(cell)
+        cells.append(cell)
 
     canvas = document.getElementById("preview")
     ctx = canvas.getContext("2d")
@@ -653,7 +549,42 @@
     play_btn = document.getElementById("play")
     shuffle_btn = document.getElementById("shuffle")
     clear_btn = document.getElementById("clear")
+    title_input = document.getElementById("card-title")
 
+    # -------------- helpers --------------
+    def cell_text(cell):
+        """Return the cell's plain text with whitespace collapsed."""
+        return " ".join(cell.textContent.split())
+
+    def refresh_empty_class(cell):
+        if cell_text(cell) == "":
+            cell.classList.add("empty")
+        else:
+            cell.classList.remove("empty")
+
+    def set_cell(cell, value):
+        cell.textContent = value
+        refresh_empty_class(cell)
+
+    # -------------- text wrapping for canvas --------------
+    def wrap_lines(text, max_width, font_size):
+        ctx.font = f"bold {font_size}px 'Cinzel', 'Georgia', serif"
+        words = text.split()
+        if not words:
+            return []
+        lines = []
+        current = words[0]
+        for word in words[1:]:
+            test = current + " " + word
+            if ctx.measureText(test).width <= max_width:
+                current = test
+            else:
+                lines.append(current)
+                current = word
+        lines.append(current)
+        return lines
+
+    # -------------- draw canvas --------------
     def draw_card(*args):
         w = canvas.width
         h = canvas.height
@@ -669,7 +600,7 @@
         ctx.lineWidth = 2
         ctx.strokeRect(12, 12, w - 24, h - 24)
 
-        title = document.getElementById("card-title").value or "BINGO"
+        title = title_input.value or "BINGO"
         ctx.font = "bold 48px 'Cinzel Decorative', 'Cinzel', 'Georgia', serif"
         ctx.fillStyle = "#25211E"
         ctx.textAlign = "center"
@@ -690,6 +621,7 @@
 
                 is_marked = play_mode and marked[idx]
 
+                # Background
                 if is_marked:
                     ctx.fillStyle = "#0f1c25"
                 elif idx == MIDDLE_INDEX:
@@ -698,34 +630,49 @@
                     ctx.fillStyle = "#faf4e0"
                 ctx.fillRect(x + 2, y + 2, cell_size - 4, cell_size - 4)
 
-                if is_marked:
-                    ctx.strokeStyle = "#D9A752"
-                elif idx == MIDDLE_INDEX:
+                # Border
+                if is_marked or idx == MIDDLE_INDEX:
                     ctx.strokeStyle = "#D9A752"
                 else:
                     ctx.strokeStyle = "#8a6a2b"
                 ctx.lineWidth = 3
                 ctx.strokeRect(x + 2, y + 2, cell_size - 4, cell_size - 4)
 
-                text = inputs[idx].value.strip()
+                # Text (wrapped, auto-shrunk to fit)
+                text = cell_text(cells[idx])
+                max_width = cell_size - 14
+                max_height = cell_size - 14
+
                 if text:
-                    max_width = cell_size - 16
-                    font_size = 22
-                    ctx.font = f"bold {font_size}px 'Cinzel', 'Georgia', serif"
-                    while ctx.measureText(text).width > max_width and font_size > 8:
+                    # Shrink font until wrapped text fits both dimensions
+                    font_size = 26
+                    while font_size > 8:
+                        lines = wrap_lines(text, max_width, font_size)
+                        line_height = font_size * 1.15
+                        total_height = len(lines) * line_height
+                        widest = max((ctx.measureText(l).width for l in lines), default=0)
+                        if total_height <= max_height and widest <= max_width:
+                            break
                         font_size -= 1
-                        ctx.font = f"bold {font_size}px 'Cinzel', 'Georgia', serif"
+
+                    ctx.font = f"bold {font_size}px 'Cinzel', 'Georgia', serif"
                     ctx.fillStyle = "#D9A752" if is_marked else "#25211E"
                     ctx.textAlign = "center"
                     ctx.textBaseline = "middle"
-                    ctx.fillText(text, x + cell_size / 2, y + cell_size / 2)
+
+                    line_height = font_size * 1.15
+                    total_height = len(lines) * line_height
+                    first_y = y + cell_size / 2 - total_height / 2 + line_height / 2
+                    for i, line in enumerate(lines):
+                        ctx.fillText(line, x + cell_size / 2, first_y + i * line_height)
                 else:
                     ctx.font = "italic 14px 'EB Garamond', 'Georgia', serif"
-                    ctx.fillStyle = "#8a8574"
+                    ctx.fillStyle = "#8a8574" if not is_marked else "rgba(217,167,82,0.5)"
                     ctx.textAlign = "center"
                     ctx.textBaseline = "middle"
                     ctx.fillText("...", x + cell_size / 2, y + cell_size / 2)
 
+    # -------------- bingo check --------------
     def check_bingo():
         global bingo_state
         is_bingo = any(all(marked[i] for i in line) for line in LINES)
@@ -738,19 +685,62 @@
             status.textContent = ""
         bingo_state = is_bingo
 
-    def make_cell_click(idx):
-        def handler(event):
-            if not play_mode:
-                return
-            marked[idx] = not marked[idx]
-            if marked[idx]:
-                inputs[idx].classList.add("marked")
-            else:
-                inputs[idx].classList.remove("marked")
-            check_bingo()
-            draw_card()
-        return handler
+    # -------------- cell event handlers --------------
+    def handle_input(event):
+        cell = event.target
+        # Enforce character limit
+        if len(cell.textContent) > MAX_CHARS:
+            cell.textContent = cell.textContent[:MAX_CHARS]
+            # Move cursor to end after trimming
+            rng = document.createRange()
+            rng.selectNodeContents(cell)
+            rng.collapse(False)
+            sel = window.getSelection()
+            sel.removeAllRanges()
+            sel.addRange(rng)
+        refresh_empty_class(cell)
+        draw_card()
 
+    def handle_click(event):
+        if not play_mode:
+            return
+        idx = int(event.target.dataset.idx)
+        marked[idx] = not marked[idx]
+        if marked[idx]:
+            cells[idx].classList.add("marked")
+        else:
+            cells[idx].classList.remove("marked")
+        check_bingo()
+        draw_card()
+
+    def prevent_enter(event):
+        if event.key == "Enter":
+            event.preventDefault()
+
+    def handle_paste(event):
+        # Force plain-text paste to prevent HTML injection
+        event.preventDefault()
+        text = event.clipboardData.getData("text/plain")
+        # Insert at cursor (or replace selection)
+        sel = window.getSelection()
+        if sel.rangeCount:
+            sel.deleteFromDocument()
+            sel.getRangeAt(0).insertNode(document.createTextNode(text))
+            sel.collapseToEnd()
+
+    # Shared proxies (created once)
+    input_proxy = create_proxy(handle_input)
+    click_proxy = create_proxy(handle_click)
+    enter_proxy = create_proxy(prevent_enter)
+    paste_proxy = create_proxy(handle_paste)
+
+    for cell in cells:
+        cell.addEventListener("input", input_proxy)
+        cell.addEventListener("click", click_proxy)
+        cell.addEventListener("keydown", enter_proxy)
+        cell.addEventListener("paste", paste_proxy)
+
+    # -------------- play mode --------------
     def toggle_play(*args):
         global play_mode, bingo_state
         play_mode = not play_mode
@@ -758,19 +748,18 @@
         if play_mode:
             for i in range(25):
                 marked[i] = False
-                inputs[i].classList.remove("marked")
+                cells[i].classList.remove("marked")
             marked[MIDDLE_INDEX] = True
-            inputs[MIDDLE_INDEX].classList.add("marked")
+            cells[MIDDLE_INDEX].classList.add("marked")
 
             play_btn.textContent = "Stop Playing"
             play_btn.classList.add("active")
             grid_container.classList.add("playing")
 
-            for inp in inputs:
-                inp.readOnly = True
-                inp.tabIndex = -1
+            for cell in cells:
+                cell.setAttribute("contenteditable", "false")
 
-            document.getElementById("card-title").readOnly = True
+            title_input.readOnly = True
             shuffle_btn.disabled = True
             clear_btn.disabled = True
             status.textContent = "Mark your squares!"
@@ -781,12 +770,11 @@
             play_btn.classList.remove("active")
             grid_container.classList.remove("playing")
 
-            for inp in inputs:
-                inp.readOnly = False
-                inp.tabIndex = 0
-                inp.classList.remove("marked")
+            for cell in cells:
+                cell.setAttribute("contenteditable", "true")
+                cell.classList.remove("marked")
 
-            document.getElementById("card-title").readOnly = False
+            title_input.readOnly = False
             shuffle_btn.disabled = False
             clear_btn.disabled = False
 
@@ -797,39 +785,43 @@
 
         draw_card()
 
+    # -------------- clear --------------
     def clear_board(*args):
         if play_mode:
             return
-        for inp in inputs:
-            inp.value = ""
+        for cell in cells:
+            set_cell(cell, "")
         draw_card()
 
+    # -------------- shuffle (middle stays) --------------
     def shuffle_board(*args):
         if play_mode:
             return
-        middle_value = inputs[MIDDLE_INDEX].value
+        middle_value = cell_text(cells[MIDDLE_INDEX])
 
         values = []
-        for i, inp in enumerate(inputs):
+        for i, cell in enumerate(cells):
             if i == MIDDLE_INDEX:
                 continue
-            if inp.value.strip() != "":
-                values.append(inp.value)
+            txt = cell_text(cell)
+            if txt != "":
+                values.append(txt)
 
         random.shuffle(values)
 
         vi = 0
-        for i, inp in enumerate(inputs):
+        for i, cell in enumerate(cells):
             if i == MIDDLE_INDEX:
                 continue
             if vi < len(values):
-                inp.value = values[vi]
+                set_cell(cell, values[vi])
                 vi += 1
             else:
-                inp.value = ""
-        inputs[MIDDLE_INDEX].value = middle_value
+                set_cell(cell, "")
+        set_cell(cells[MIDDLE_INDEX], middle_value)
         draw_card()
 
+    # -------------- download PNG --------------
     def download_png(*args):
         data_url = canvas.toDataURL("image/png")
         link = document.createElement("a")
@@ -839,14 +831,11 @@
         link.click()
         document.body.removeChild(link)
 
-    for i, inp in enumerate(inputs):
-        inp.addEventListener("input", create_proxy(draw_card))
-        inp.addEventListener("click", create_proxy(make_cell_click(i)))
-
-    document.getElementById("card-title").addEventListener("input", create_proxy(draw_card))
+    # -------------- wire up --------------
+    title_input.addEventListener("input", create_proxy(draw_card))
     document.getElementById("download").addEventListener("click", create_proxy(download_png))
-    document.getElementById("shuffle").addEventListener("click", create_proxy(shuffle_board))
-    document.getElementById("clear").addEventListener("click", create_proxy(clear_board))
+    shuffle_btn.addEventListener("click", create_proxy(shuffle_board))
+    clear_btn.addEventListener("click", create_proxy(clear_board))
     play_btn.addEventListener("click", create_proxy(toggle_play))
 
     draw_card()
